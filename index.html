@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yu-Gi-Oh! Card Searcher</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Font */
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #1a1a1a;
+            background-image: 
+                radial-gradient(circle at 50% 50%, #2a2a2a 0%, #111 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+            user-select: none; /* Good for app-like feel */
+        }
+
+        .yugioh-font {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* --- 3D Card Structure --- */
+        .card-container {
+            perspective: 1200px; /* Increased perspective for better 3D depth during spin */
+            width: 300px;
+            height: 438px;
+            position: relative;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            /* Initial State: Show Back (180deg) and Fully Visible */
+            transform: rotateY(180deg);
+            opacity: 1; 
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(199, 146, 234, 0.5);
+            overflow: hidden;
+        }
+
+        .card-face img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-front {
+            background-color: #1a1a1a;
+            transform: rotateY(0deg);
+        }
+
+        .card-back {
+            background-color: #2a2a2a;
+            transform: rotateY(180deg);
+        }
+
+
+        /* --- Animation --- */
+        .summon-animation {
+            /* Slower: Increased duration from 2s to 3s */
+            animation: spinRealCard 3s cubic-bezier(0.1, 0.7, 0.1, 1) forwards;
+        }
+
+        @keyframes spinRealCard {
+            0% {
+                /* Start at Card Back (180deg) */
+                transform: rotateY(180deg);
+            }
+            100% {
+                /* Land on Front */
+                /* 180 start + 540 (1.5 spins) = 720deg */
+                transform: rotateY(720deg);
+            }
+        }
+
+        /* --- Loading Spinner --- */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #b794f4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stat-badge {
+            background: rgba(0,0,0,0.8);
+            border: 1px solid #444;
+        }
+        
+        input:focus {
+            outline: none;
+        }
+        
+        /* Scrollbar for suggestions if needed */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #2d3748;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #718096;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center p-6">
+
+    <!-- Header -->
+    <header class="text-center mb-8 animate-fade-in-down select-none">
+        <h1 class="text-4xl md:text-5xl font-bold yugioh-font text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-400 drop-shadow-lg mb-2">
+            Card Display
+        </h1>
+        <p class="text-gray-400">Enter a card name to summon it.</p>
+    </header>
+
+    <!-- Search Section -->
+    <div class="w-full max-w-md flex flex-col gap-4 mb-6 relative z-20">
+        <div class="relative flex items-center">
+            <input 
+                type="text" 
+                id="searchInput" 
+                placeholder="e.g. Dark Magician" 
+                class="w-full bg-gray-800 border-2 border-gray-700 text-white px-4 py-3 rounded-l-lg focus:border-yellow-500 transition-all shadow-lg"
+                onkeypress="handleKeyPress(event)"
+            >
+            <button 
+                onclick="searchCard()" 
+                class="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-bold py-3 px-6 rounded-r-lg transition-all shadow-lg border-2 border-l-0 border-yellow-700 cursor-pointer"
+            >
+                Search
+            </button>
+        </div>
+        
+        <p id="errorMsg" class="text-red-400 text-sm text-center hidden font-semibold"></p>
+    </div>
+
+    <!-- Display Section -->
+    <div id="displayArea" class="flex flex-col items-center min-h-[500px] w-full max-w-2xl relative">
+        
+        <!-- Loading State -->
+        <div id="loader" class="hidden absolute top-40 z-30">
+            <div class="loader"></div>
+        </div>
+
+        <!-- Card Container (3D Space) -->
+        <div class="card-container mb-6" id="cardContainer">
+            <div id="cardInner" class="card-inner">
+                <!-- Front Face (API Image) -->
+                <div class="card-face card-front">
+                    <img id="cardImg" src="" alt="">
+                </div>
+                <!-- Back Face (Updated Image URL) -->
+                <div class="card-face card-back">
+                    <img src="https://i.postimg.cc/x1QRx7ty/unnamed.jpg" alt="TCG Card Back">
+                </div>
+            </div>
+        </div>
+
+        <!-- Suggestions Area -->
+        <div id="suggestions" class="hidden flex flex-wrap gap-2 justify-center items-center bg-gray-800/50 p-3 rounded-lg border border-gray-700/50 mb-6 w-full relative z-10">
+            <!-- Chips will be injected here -->
+        </div>
+
+        <!-- Card Details (Text) -->
+        <div id="cardDetails" class="hidden w-full bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-2xl animate-fade-in-up relative z-10 select-text">
+            <div class="flex justify-between items-start mb-4 border-b border-gray-700 pb-2">
+                <h2 id="cardName" class="text-2xl font-bold text-yellow-400 yugioh-font"></h2>
+                <span id="cardType" class="px-2 py-1 bg-gray-700 rounded text-xs uppercase tracking-wider text-gray-300"></span>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+                <div id="monsterStats" class="hidden col-span-2 sm:col-span-1 flex gap-2">
+                    <span class="stat-badge px-2 py-1 rounded text-orange-400">ATK / <span id="atkVal"></span></span>
+                    <span class="stat-badge px-2 py-1 rounded text-blue-400">DEF / <span id="defVal"></span></span>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                    <span class="text-gray-400">Race:</span> <span id="cardRace" class="text-white"></span>
+                    <span id="cardLevelSpan" class="ml-2 hidden"><span class="text-gray-400">Level:</span> <span id="cardLevel" class="text-yellow-500 font-bold"></span></span>
+                </div>
+            </div>
+
+            <p id="cardDesc" class="text-gray-300 text-sm leading-relaxed italic border-l-4 border-yellow-600 pl-4 bg-gray-900/50 p-2 rounded"></p>
+        </div>
+
+    </div>
+
+    <script>
+        const API_URL = "https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=";
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                searchCard();
+            }
+        }
+
+        async function searchCard() {
+            const input = document.getElementById('searchInput');
+            const query = input.value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            const loader = document.getElementById('loader');
+            const cardInner = document.getElementById('cardInner');
+            const cardDetails = document.getElementById('cardDetails');
+            const suggestionsDiv = document.getElementById('suggestions');
+
+            if (!query) return;
+
+            // Reset UI
+            errorMsg.classList.add('hidden');
+            cardDetails.classList.add('hidden');
+            suggestionsDiv.classList.add('hidden'); 
+            
+            // Snap back to Card Back immediately (180deg)
+            cardInner.classList.remove('summon-animation');
+            
+            loader.classList.remove('hidden');
+
+            try {
+                // Fetch data using fuzzy search
+                const response = await fetch(`${API_URL}${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                if (data.error) throw new Error("Card not found");
+
+                const cards = data.data;
+                const exactMatch = cards[0]; // Primary result
+
+                renderCard(exactMatch);
+                renderSuggestions(cards);
+
+            } catch (err) {
+                console.error(err);
+                errorMsg.textContent = "Card not found. Please check your spelling.";
+                errorMsg.classList.remove('hidden');
+                loader.classList.add('hidden');
+            }
+        }
+
+        function renderSuggestions(cards) {
+            const suggestionsDiv = document.getElementById('suggestions');
+            suggestionsDiv.innerHTML = ''; // Clear previous
+
+            // If we only have 1 card, no need for suggestions
+            if (cards.length <= 1) return;
+
+            suggestionsDiv.classList.remove('hidden');
+
+            const title = document.createElement('div');
+            title.className = "w-full text-center text-xs text-gray-400 mb-1 uppercase tracking-wide";
+            title.textContent = "Related Cards / Did you mean:";
+            suggestionsDiv.appendChild(title);
+
+            // Limit to 8 suggestions to prevent UI clutter
+            const suggestions = cards.slice(1, 9);
+
+            suggestions.forEach(card => {
+                const btn = document.createElement('button');
+                btn.className = "bg-gray-700 hover:bg-yellow-600 hover:text-black text-white text-xs px-3 py-1.5 rounded-full transition-all border border-gray-600 shadow-sm";
+                btn.textContent = card.name;
+                
+                // Clicking a suggestion searches for that exact card
+                btn.onclick = () => {
+                    document.getElementById('searchInput').value = card.name;
+                    searchCard();
+                };
+                
+                suggestionsDiv.appendChild(btn);
+            });
+        }
+
+        function renderCard(card) {
+            const loader = document.getElementById('loader');
+            const cardInner = document.getElementById('cardInner');
+            const cardImg = document.getElementById('cardImg');
+            const cardDetails = document.getElementById('cardDetails');
+
+            const imageUrl = card.card_images[0].image_url;
+            const imgPreloader = new Image();
+            imgPreloader.src = imageUrl;
+            
+            imgPreloader.onload = () => {
+                loader.classList.add('hidden');
+                cardImg.src = imageUrl;
+                
+                // Force Reflow to restart animation from the beginning
+                void cardInner.offsetWidth; 
+                
+                // Start animation (Flips from Back to Front)
+                cardInner.classList.add('summon-animation');
+
+                // Update text details
+                document.getElementById('cardName').textContent = card.name;
+                document.getElementById('cardType').textContent = card.type;
+                document.getElementById('cardDesc').textContent = card.desc;
+                document.getElementById('cardRace').textContent = card.race;
+
+                const monsterStats = document.getElementById('monsterStats');
+                const cardLevelSpan = document.getElementById('cardLevelSpan');
+                
+                if (card.atk !== undefined) {
+                    monsterStats.classList.remove('hidden');
+                    document.getElementById('atkVal').textContent = card.atk;
+                    document.getElementById('defVal').textContent = (card.def !== undefined) ? card.def : "-";
+                } else {
+                    monsterStats.classList.add('hidden');
+                }
+
+                if (card.level) {
+                    cardLevelSpan.classList.remove('hidden');
+                    document.getElementById('cardLevel').textContent = "⭐".repeat(Math.min(card.level, 12));
+                } else {
+                    cardLevelSpan.classList.add('hidden');
+                }
+
+                setTimeout(() => {
+                    cardDetails.classList.remove('hidden');
+                }, 800);
+            };
+        }
+    </script>
+</body>
+</html>
