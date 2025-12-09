@@ -3,223 +3,649 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yu-Gi-Oh! Card Searcher</title>
+    <title>Yu-Gi-Oh! Display</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom Font */
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:ital,wght@0,400;0,500;0,700;0,900;1,400&family=Share+Tech+Mono&family=Oswald:wght@700&display=swap');
 
         body {
             font-family: 'Roboto', sans-serif;
             background-color: black;
-            min-height: 100vh;
-            color: white;
-            overflow-x: hidden;
-            user-select: none; /* Good for app-like feel */
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            user-select: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .yugioh-font {
-            font-family: 'Cinzel', serif;
-        }
+        .yugioh-font { font-family: 'Cinzel', serif; }
+        .tech-font { font-family: 'Share Tech Mono', monospace; }
 
-        /* --- 3D Card Structure --- */
-        .card-container {
-            perspective: 1200px; /* Increased perspective for better 3D depth during spin */
-            width: 300px;
-            height: 438px;
-            position: relative;
-            z-index: 10;
-            flex-shrink: 0;
-        }
-
-        .card-inner {
+        /* --- Virtual Rectangle Container (16:9) --- */
+        .virtual-rectangle {
             position: relative;
             width: 100%;
-            height: 100%;
-            text-align: center;
-            transition: transform 0.8s;
-            transform-style: preserve-3d;
-            /* Initial State: Show Back (180deg) and Fully Visible */
-            transform: rotateY(180deg);
-            opacity: 1; 
-        }
-
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(199, 146, 234, 0.5);
+            max-width: 1600px;
+            aspect-ratio: 16 / 9;
+            background-image: url('YGO-streaming-layout.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
             overflow: hidden;
         }
 
-        .card-face img {
-            width: 100%;
+        .layout-container { display: flex; width: 100%; height: 100%; }
+
+        /* --- Left Zone: Card Highlight --- */
+        .left-zone {
+            width: 23%;
             height: 100%;
-            object-fit: cover;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 18%; 
         }
 
-        .card-front {
-            background-color: black;
-            transform: rotateY(0deg);
+        /* --- Right Zone: Playmat --- */
+        .right-zone {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; 
+            padding: 2% 2.5rem;
         }
 
-        .card-back {
-            background-color: black;
-            transform: rotateY(180deg);
+        /* --- UPPER HALF: LP Calculator & Timer (Compressed) --- */
+        .lp-calculator-section {
+            width: 100%;
+            height: 40%; 
+            padding-top: 2%; 
         }
 
-
-        /* --- Animation --- */
-        .summon-animation {
-            /* Slower: Increased duration from 2s to 3s */
-            animation: spinRealCard 3s cubic-bezier(0.1, 0.7, 0.1, 1) forwards;
+        .lp-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            gap: 8px; 
+            align-items: start;
+            justify-content: center;
         }
 
-        @keyframes spinRealCard {
-            0% {
-                /* Start at Card Back (180deg) */
-                transform: rotateY(180deg);
-            }
-            100% {
-                /* Land on Front */
-                /* 180 start + 540 (1.5 spins) = 720deg */
-                transform: rotateY(720deg);
-            }
-        }
+        .player-column { flex: 1; display: flex; flex-direction: column; gap: 5px; }
 
-        /* --- Loading Spinner --- */
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #b794f4;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .stat-badge {
-            background: rgba(0,0,0,0.8);
-            border: 1px solid #444;
-        }
-        
-        input:focus {
+        /* Updated name input for consistent rounding */
+        .name-input {
+            background: #0f172a; border: 1px solid #334155; color: white;
+            text-align: center; padding: 4px; 
+            border-radius: 6px; /* MATCH LP BOX ROUNDING */
+            font-family: 'Share Tech Mono', monospace; font-size: 0.8rem;
+            letter-spacing: 1px; width: 100%; box-sizing: border-box;
             outline: none;
         }
+
+        .score-box-wrapper {
+            overflow: hidden; 
+            border-radius: 6px;
+            border: 2px solid rgba(255,255,255,0.1);
+            position: relative;
+            flex: 1;
+        }
         
-        /* Scrollbar for suggestions if needed */
-        .custom-scrollbar::-webkit-scrollbar {
-            height: 6px;
+        /* RESTORED LP BOX SIZE */
+        .score-box {
+            font-size: 2.8rem; /* RESTORED to large size */
+            font-weight: 900; 
+            text-align: center; 
+            padding: 8px 0; /* RESTORED to large padding */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5); 
+            font-family: 'Roboto', sans-serif;
+            position: relative;
+            line-height: 1.2; 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            width: 100%;
         }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #2d3748;
-            border-radius: 4px;
+
+        .digit { display: inline-block; }
+        
+        /* === LP Animation Styles - SMOOTH SLOT ROLL === */
+        .digit.slot-animation {
+            animation: slotRollSmooth 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; 
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #4a5568;
-            border-radius: 4px;
+        @keyframes slotRollSmooth {
+            0% { 
+                transform: translateY(-100%); 
+                opacity: 0; 
+                filter: blur(2px); 
+            } 
+            50% {
+                filter: blur(0);
+            }
+            100% { 
+                transform: translateY(0); 
+                opacity: 1; 
+                filter: blur(0);
+            } 
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #718096;
+
+        /* PURGE GRADIENT: Solid colors only */
+        .score-p1 { background: #003366; color: white; border-color: #004e82; }
+        .score-p2 { background: #660000; color: white; border-color: #820014; }
+
+        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin-top: 3px; }
+        .lp-btn {
+            background: black; border: 1px solid; color: white;
+            font-family: 'Share Tech Mono', monospace; font-size: 0.7rem;
+            padding: 3px 0;
+            border-radius: 4px; cursor: pointer;
+            transition: all 0.1s; display: flex; flex-direction: column;
+            align-items: center; line-height: 1;
         }
+        .lp-btn:active { transform: scale(0.95); }
+        .lp-btn span { font-size: 0.6rem; opacity: 0.7; }
+        .btn-add { border-color: #22c55e; color: #22c55e; }
+        .btn-add:hover { background: rgba(34, 197, 94, 0.1); }
+        .btn-sub { border-color: #ef4444; color: #ef4444; }
+        .btn-sub:hover { background: rgba(239, 68, 68, 0.1); }
+
+        .center-column { width: 100px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        
+        /* Updated Timer Display Styles */
+        .timer-display {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: white;
+            font-family: 'Oswald', sans-serif;
+            text-shadow: none;
+            letter-spacing: 1px;
+        }
+
+        /* === Halve Button STYLES OVERHAUL (New Block Style) === */
+        .halve-btn {
+            width: 40px; 
+            height: 100%; /* GUARANTEES HEIGHT MATCH */
+            box-sizing: border-box;
+            
+            /* Visual Styling based on reference image */
+            background: black;
+            border: 2px solid #fbbf24; /* Yellow border */
+            border-radius: 6px; /* Matched LP box rounding */
+            cursor: pointer;
+            transition: all 0.1s; 
+            
+            /* Center content */
+            display: flex;
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            line-height: 1;
+            
+            /* Text Styling */
+            font-weight: 900; 
+            color: #fbbf24;
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.8rem; /* REDUCED FONT SIZE */
+            text-shadow: none; /* REMOVED TEXT SHADOW/CHROMATIC EFFECT */
+        }
+        /* Style the text inside the button */
+        .halve-btn .fraction {
+            display: block;
+            line-height: 1;
+            margin: 0; /* Removed vertical margin to compress text slightly */
+            padding: 0;
+        }
+        
+        .halve-btn:hover { background: rgba(251, 191, 36, 0.1); }
+        .halve-btn:active { transform: scale(0.95); }
+
+        .timer-btn {
+            background: transparent; border: 1px solid #555;
+            color: #aaa; border-radius: 50%; width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .timer-btn.active { border-color: #22c55e; color: #22c55e; }
+        .timer-btn:hover { border-color: white; color: white; }
+        .reset-btn {
+            border: 1px solid #eab308; color: #eab308;
+            background: transparent; font-size: 0.7rem;
+            padding: 4px 12px; border-radius: 12px; font-weight: bold; cursor: pointer;
+        }
+        
+        /* --- LOWER HALF: Search & Details (Unchanged) --- */
+        .lower-section {
+            width: 100%;
+            height: 58%; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 2%; 
+        }
+        
+        /* --- Search Bar Container --- */
+        .search-container {
+            width: 100%; 
+            max-width: 650px; 
+            display: flex;
+            flex-direction: column; 
+            gap: 5px;
+            margin-bottom: 0.75rem; 
+        }
+        /* --- Suggestions Styling --- */
+        .suggestions-line {
+            display: flex;
+            align-items: center; 
+            flex-wrap: wrap; 
+            gap: 8px; 
+            padding: 4px 8px;
+            background-color: #0f172a; 
+            border-radius: 6px;
+        }
+        .suggestions-title {
+            color: #94a3b8; 
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: 5px; 
+            white-space: nowrap;
+        }
+        
+        /* --- 3D Card Structure --- */
+        .card-container { perspective: 1200px; width: 85%; aspect-ratio: 0.68; position: relative; z-index: 10; }
+        .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.8s; transform-style: preserve-3d; transform: rotateY(180deg); }
+        .card-face { 
+            position: absolute; width: 100%; height: 100%; 
+            -webkit-backface-visibility: hidden; backface-visibility: hidden; 
+            border-radius: 2.5%; 
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8); overflow: hidden; background-color: black; 
+        }
+        .card-face img { width: 100%; height: 100%; object-fit: cover; }
+        .card-front { transform: rotateY(0deg); }
+        .card-back { transform: rotateY(180deg); }
+        .summon-animation { animation: spinRealCard 3s cubic-bezier(0.1, 0.7, 0.1, 1) forwards; }
+        @keyframes spinRealCard { 0% { transform: rotateY(180deg); } 100% { transform: rotateY(720deg); } }
+
+        /* --- Card Info Panel (Unchanged) --- */
+        .style-card-panel {
+            background-color: #0f172a; border: 1px solid #1e293b; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            width: 100%; max-width: 650px; height: 200px;
+            display: flex; flex-direction: column; padding: 0.75rem; border-radius: 0.5rem;
+        }
+        .text-gold { color: #fbbf24; }
+        .stat-box {
+            background-color: #000; border: 1px solid #333; color: #fff;
+            padding: 2px 8px; border-radius: 4px; font-weight: bold;
+            font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;
+        }
+        .stat-value { color: #ef4444; } 
+        .stat-value-def { color: #60a5fa; } 
+        .desc-box {
+            background-color: rgba(255, 255, 255, 0.05); border-left: 3px solid #fbbf24;
+            padding: 8px; color: #e2e8f0; font-style: italic;
+            font-size: 0.85rem; line-height: 1.4; flex: 1; overflow-y: auto;
+        }
+        
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+
+        input:focus { outline: none; }
     </style>
 </head>
-<body class="flex flex-col items-center p-6">
+<body>
 
-    <!-- Header -->
-    <header class="text-center mb-8 animate-fade-in-down select-none">
-        <h1 class="text-4xl md:text-5xl font-bold yugioh-font text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-400 drop-shadow-lg mb-2">
-            Card Display
-        </h1>
-        <p class="text-gray-400">Enter a card name to summon it.</p>
-    </header>
-
-    <!-- Search Section -->
-    <div class="w-full max-w-md flex flex-col gap-4 mb-6 relative z-20">
-        <div class="relative flex items-center">
-            <input 
-                type="text" 
-                id="searchInput" 
-                placeholder="e.g. Dark Magician" 
-                class="w-full bg-gray-800 border-2 border-gray-700 text-white px-4 py-3 rounded-l-lg focus:border-yellow-500 transition-all shadow-lg"
-                onkeypress="handleKeyPress(event)"
-            >
-            <button 
-                onclick="searchCard()" 
-                class="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-bold py-3 px-6 rounded-r-lg transition-all shadow-lg border-2 border-l-0 border-yellow-700 cursor-pointer"
-            >
-                Search
-            </button>
-        </div>
-        
-        <p id="errorMsg" class="text-red-400 text-sm text-center hidden font-semibold"></p>
-    </div>
-
-    <!-- Display Section -->
-    <div id="displayArea" class="flex flex-col items-center min-h-[500px] w-full max-w-2xl relative">
-        
-        <!-- Loading State -->
-        <div id="loader" class="hidden absolute top-40 z-30">
-            <div class="loader"></div>
-        </div>
-
-        <!-- Card Container (3D Space) -->
-        <div class="card-container mb-6" id="cardContainer">
-            <div id="cardInner" class="card-inner">
-                <!-- Front Face (API Image) -->
-                <div class="card-face card-front">
-                    <img id="cardImg" src="" alt="">
-                </div>
-                <!-- Back Face (Local Asset) -->
-                <div class="card-face card-back">
-                    <img src="assets/card_back.jpg" alt="TCG Card Back">
-                </div>
-            </div>
-        </div>
-
-        <!-- Suggestions Area -->
-        <div id="suggestions" class="hidden flex flex-wrap gap-2 justify-center items-center bg-gray-800/50 p-3 rounded-lg border border-gray-700/50 mb-6 w-full relative z-10">
-            <!-- Chips will be injected here -->
-        </div>
-
-        <!-- Card Details (Text) -->
-        <div id="cardDetails" class="hidden w-full bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-2xl animate-fade-in-up relative z-10 select-text">
-            <div class="flex justify-between items-start mb-4 border-b border-gray-700 pb-2">
-                <h2 id="cardName" class="text-2xl font-bold text-yellow-400 yugioh-font"></h2>
-                <span id="cardType" class="px-2 py-1 bg-gray-700 rounded text-xs uppercase tracking-wider text-gray-300"></span>
-            </div>
+    <!-- Virtual Rectangle Container (16:9 Frame) -->
+    <div class="virtual-rectangle">
+        <div class="layout-container">
             
-            <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
-                <div id="monsterStats" class="hidden col-span-2 sm:col-span-1 flex gap-2">
-                    <span class="stat-badge px-2 py-1 rounded text-orange-400">ATK / <span id="atkVal"></span></span>
-                    <span class="stat-badge px-2 py-1 rounded text-blue-400">DEF / <span id="defVal"></span></span>
-                </div>
-                <div class="col-span-2 sm:col-span-1">
-                    <span class="text-gray-400">Race:</span> <span id="cardRace" class="text-white"></span>
-                    <span id="cardLevelSpan" class="ml-2 hidden"><span class="text-gray-400">Level:</span> <span id="cardLevel" class="text-yellow-500 font-bold"></span></span>
+            <!-- LEFT ZONE: Card Display (Below "CARD HIGHLIGHT") -->
+            <div class="left-zone">
+                <div id="loader" class="hidden mb-6 border-4 border-t-yellow-500 rounded-full w-10 h-10 animate-spin"></div>
+                <div class="card-container" id="cardContainer">
+                    <div id="cardInner" class="card-inner">
+                        <div class="card-face card-front">
+                            <img id="cardImg" src="" alt="">
+                        </div>
+                        <div class="card-face card-back">
+                            <img src="assets/card_back.jpg" alt="TCG Card Back">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <p id="cardDesc" class="text-gray-300 text-sm leading-relaxed italic border-l-4 border-yellow-600 pl-4 bg-gray-900/50 p-2 rounded"></p>
-        </div>
+            <!-- RIGHT ZONE: Playmat Area (Split Top/Bottom) -->
+            <div class="right-zone">
+                
+                <!-- UPPER HALF: LP Calculator & Timer -->
+                <div class="lp-calculator-section">
+                    <div class="lp-container">
+                        
+                        <!-- Player 1 -->
+                        <div class="player-column">
+                            <input type="text" value="DUELIST 1" class="name-input" id="name1">
+                            <div class="flex items-stretch gap-2">
+                                <!-- Wrapper for overflow: hidden -->
+                                <div class="score-box-wrapper score-p1 flex-1">
+                                    <div class="score-box" id="lp1">
+                                        <!-- Initial digit breakdown -->
+                                        <span class="digit">8</span>
+                                        <span class="digit">0</span>
+                                        <span class="digit">0</span>
+                                        <span class="digit">0</span>
+                                    </div>
+                                </div>
+                                <!-- Updated Halve Button -->
+                                <button class="halve-btn" onclick="updateLP(1, -Math.floor(lp1 / 2))">
+                                    <div class="fraction">1</div>
+                                    <div class="fraction">/</div>
+                                    <div class="fraction">2</div>
+                                </button>
+                            </div>
+                            <div class="btn-grid">
+                                <button class="lp-btn btn-add" onclick="updateLP(1, 1000)">1000 <span>+</span></button>
+                                <button class="lp-btn btn-add" onclick="updateLP(1, 500)">500 <span>+</span></button>
+                                <button class="lp-btn btn-add" onclick="updateLP(1, 100)">100 <span>+</span></button>
+                                <button class="lp-btn btn-add" onclick="updateLP(1, 50)">50 <span>+</span></button>
+                                <button class="lp-btn btn-sub" onclick="updateLP(1, -1000)">- <span>1000</span></button>
+                                <button class="lp-btn btn-sub" onclick="updateLP(1, -500)">- <span>500</span></button>
+                                <button class="lp-btn btn-sub" onclick="updateLP(1, -100)">- <span>100</span></button>
+                                <button class="lp-btn btn-sub" onclick="updateLP(1, -50)">- <span>50</span></button>
+                            </div>
+                        </div>
 
-    </div>
+                        <!-- Center Timer -->
+                        <div class="center-column">
+                            <div class="timer-display" id="timer">50:00</div>
+                            <div class="flex gap-2">
+                                <button class="timer-btn active" id="timerToggleBtn" onclick="toggleTimer()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                                    </svg>
+                                </button>
+                                <button class="timer-btn" onclick="resetTimer()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <button class="reset-btn" onclick="resetLP()">RESET LP</button>
+                        </div>
+
+                        <!-- Player 2 -->
+                        <div class="player-column">
+                            <input type="text" value="DUELIST 2" class="name-input" id="name2">
+                            <div class="flex items-stretch gap-2">
+                                <!-- Halve button is now same height as score-box content -->
+                                <button class="halve-btn" onclick="updateLP(2, -Math.floor(lp2 / 2))">
+                                    <div class="fraction">1</div>
+                                    <div class="fraction">/</div>
+                                    <div class="fraction">2</div>
+                                </button>
+                                <!-- Wrapper for overflow: hidden -->
+                                <div class="score-box-wrapper score-p2 flex-1">
+                                    <div class="score-box" id="lp2">
+                                        <span class="digit">8</span>
+                                        <span class="digit">0</span>
+                                        <span class="digit">0</span>
+                                        <span class="digit">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="btn-grid">
+                                <button class="lp-btn btn-add" onclick="updateLP(2, 1000)">1000 <span>+</span></button>
+                                <button class="lp-btn btn-add" onclick="updateLP(2, 500)">500 <span>+</span></button>
+                                <button class="lp-btn btn-add" onclick="updateLP(2, 100)">100 <span>+</span></button>
+                                <button class="lp-btn btn-add" onclick="updateLP(2, 50)">50 <span>+</span></button>
+                                <button class="lp-btn btn-sub" onclick="updateLP(2, -1000)">- <span>1000</span></button>
+                                <button class="lp-btn btn-sub" onclick="updateLP(2, -500)">- <span>500</span></button>
+                                <button class="lp-btn btn-sub" onclick="updateLP(2, -100)">- <span>100</span></button>
+                                <button class="lp-btn btn-sub" onclick="updateLP(2, -50)">- <span>50</span></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- LOWER HALF: Search & Details -->
+                <div class="lower-section">
+                    <!-- Search Container (Modified order) -->
+                    <div class="search-container">
+                        
+                        <!-- Search Input Bar (Element 1) -->
+                        <div class="relative flex items-center shadow-lg">
+                            <input 
+                                type="text" 
+                                id="searchInput" 
+                                placeholder="Search card name..." 
+                                class="w-full bg-gray-900 border-2 border-gray-700 text-white px-3 py-2 rounded-l-lg focus:border-yellow-500 transition-all placeholder-gray-500 font-medium text-sm"
+                                onkeypress="handleKeyPress(event)"
+                            >
+                            <button 
+                                onclick="searchCard()" 
+                                class="bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-2 px-5 rounded-r-lg transition-all border-2 border-l-0 border-yellow-700 cursor-pointer text-sm"
+                            >
+                                Search
+                            </button>
+                        </div>
+                        
+                        <p id="errorMsg" class="text-red-600 text-xs font-bold hidden bg-white/80 p-1 rounded text-center"></p>
+
+                        <!-- Suggestions Area (Moved BELOW Search Input - Element 2) -->
+                        <div id="suggestions" class="hidden suggestions-line">
+                            <!-- Title moved inside the wrapper -->
+                            <div class="suggestions-title">RELATED:</div>
+                            <!-- Chips injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Details -->
+                    <div id="cardDetails" class="hidden w-full max-w-3xl style-card-panel p-4 rounded-lg animate-fade-in-up relative z-10 select-text">
+                        
+                        <!-- Header: Name and Type Badge -->
+                        <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-2">
+                            <h2 id="cardName" class="text-2xl font-bold text-gold yugioh-font tracking-wide truncate pr-2"></h2>
+                            <span id="cardType" class="px-2 py-0.5 bg-gray-700 text-gray-300 text-xs font-bold uppercase rounded border border-gray-600 whitespace-nowrap"></span>
+                        </div>
+                        
+                        <!-- Stats Row -->
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-2 text-xs">
+                            
+                            <!-- Left: ATK / DEF -->
+                            <div id="monsterStats" class="hidden flex gap-2">
+                                <div class="stat-box">
+                                    ATK <span class="text-gray-500">/</span> <span id="atkVal" class="stat-value"></span>
+                                </div>
+                                <div class="stat-box">
+                                    DEF <span class="text-gray-500">/</span> <span id="defVal" class="stat-value-def"></span>
+                                </div>
+                            </div>
+
+                            <!-- Right: Type / Attr / Level -->
+                            <div class="flex items-center gap-3 text-gray-400 font-medium ml-auto">
+                                <!-- Type -->
+                                <span>Type: <span id="cardRace" class="text-white"></span></span>
+                                
+                                <!-- Attribute -->
+                                <span id="cardAttributeSpan" class="hidden">Attr: <span id="cardAttribute" class="font-bold text-white uppercase"></span></span>
+                                
+                                <!-- Level -->
+                                <span id="cardLevelSpan" class="hidden flex items-center gap-1">
+                                    Lv: <span id="cardLevel" class="text-gold text-base leading-none tracking-widest"></span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Description Box (Scrollable) -->
+                        <div class="desc-box rounded">
+                            <p id="cardDesc"></p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div> <!-- End Virtual Rectangle -->
 
     <script>
+        // --- CALCULATOR LOGIC ---
+        let lp1 = 8000;
+        let lp2 = 8000;
+        let timerInterval;
+        let timeRemaining = 50 * 60; // 50 minutes in seconds
+        let isTimerRunning = false;
+
+        // Helper function to render LP as individual digit spans
+        function renderLP(id, value) {
+            const element = document.getElementById(id);
+            const valueStr = value.toString();
+            element.innerHTML = '';
+            
+            for (const char of valueStr) {
+                const span = document.createElement('span');
+                span.className = 'digit';
+                span.textContent = char;
+                element.appendChild(span);
+            }
+        }
+        
+        // Initialize LP display with digit spans
+        document.addEventListener('DOMContentLoaded', () => {
+            renderLP('lp1', lp1);
+            renderLP('lp2', lp2);
+            updateTimerDisplay();
+        });
+
+        // Function to apply animation sequentially from right to left
+        function applySequentialSlotAnimation(id) {
+            const element = document.getElementById(id);
+            const digits = element.querySelectorAll('.digit');
+            
+            // Loop through digits from right to left (lowest to highest value)
+            for (let i = digits.length - 1; i >= 0; i--) {
+                const digit = digits[i];
+                // Apply a delay based on its position
+                const delay = (digits.length - 1 - i) * 75; // 75ms delay per digit
+
+                // Apply animation with the calculated delay
+                setTimeout(() => {
+                    digit.classList.remove('slot-animation');
+                    void digit.offsetWidth; // Trigger reflow
+                    digit.classList.add('slot-animation');
+                    
+                    // Remove animation class after it finishes
+                    setTimeout(() => {
+                        digit.classList.remove('slot-animation');
+                    }, 800); // Wait for animation duration (0.8s)
+                }, delay);
+            }
+        }
+
+        function updateLP(player, amount) {
+            let targetLP, targetId;
+            if (player === 1) {
+                targetLP = lp1;
+                targetId = 'lp1';
+            } else {
+                targetLP = lp2;
+                targetId = 'lp2';
+            }
+            
+            targetLP += amount;
+            if (targetLP < 0) targetLP = 0;
+            
+            if (player === 1) {
+                lp1 = targetLP;
+            } else {
+                lp2 = targetLP;
+            }
+            
+            // 1. Render the new digits (instantly replacing old ones)
+            renderLP(targetId, targetLP);
+            
+            // 2. Apply the sequential slot roll animation
+            applySequentialSlotAnimation(targetId);
+        }
+
+        function resetLP() {
+            lp1 = 8000;
+            lp2 = 8000;
+            
+            renderLP('lp1', lp1);
+            renderLP('lp2', lp2);
+            
+            // Apply animation for reset
+            applySequentialSlotAnimation('lp1');
+            applySequentialSlotAnimation('lp2');
+
+            document.getElementById('name1').value = "DUELIST 1";
+            document.getElementById('name2').value = "DUELIST 2";
+        }
+
+        // --- TIMER LOGIC (Unchanged) ---
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('timerToggleBtn');
+            const iconPath = btn.querySelector('path');
+            
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                btn.classList.add('active'); 
+                // Play Icon
+                iconPath.setAttribute('d', "M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z");
+            } else {
+                isTimerRunning = true;
+                btn.classList.remove('active');
+                // Pause Icon
+                iconPath.setAttribute('d', "M15.75 5.25v13.5m-7.5-13.5v13.5");
+                
+                timerInterval = setInterval(() => {
+                    if (timeRemaining > 0) {
+                        timeRemaining--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerInterval);
+                        isTimerRunning = false;
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timeRemaining = 50 * 60;
+            updateTimerDisplay();
+            
+            const btn = document.getElementById('timerToggleBtn');
+            const iconPath = btn.querySelector('path');
+            btn.classList.add('active');
+            iconPath.setAttribute('d', "M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z");
+        }
+        
+        // --- CARD SEARCH LOGIC (Unchanged) ---
         const API_URL = "https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=";
 
         function handleKeyPress(event) {
-            if (event.key === 'Enter') {
-                searchCard();
-            }
+            if (event.key === 'Enter') searchCard();
         }
 
         async function searchCard() {
@@ -233,32 +659,31 @@
 
             if (!query) return;
 
-            // Reset UI
             errorMsg.classList.add('hidden');
             cardDetails.classList.add('hidden');
-            suggestionsDiv.classList.add('hidden'); 
-            
-            // Snap back to Card Back immediately (180deg)
+            if (suggestionsDiv) suggestionsDiv.classList.add('hidden'); 
             cardInner.classList.remove('summon-animation');
-            
             loader.classList.remove('hidden');
 
             try {
-                // Fetch data using fuzzy search
                 const response = await fetch(`${API_URL}${encodeURIComponent(query)}`);
                 const data = await response.json();
 
-                if (data.error) throw new Error("Card not found");
+                if (data.error) {
+                    errorMsg.textContent = "No card found with that name. Check spelling.";
+                    errorMsg.classList.remove('hidden');
+                    loader.classList.add('hidden');
+                    return;
+                }
 
                 const cards = data.data;
-                const exactMatch = cards[0]; // Primary result
-
+                const exactMatch = cards[0];
                 renderCard(exactMatch);
                 renderSuggestions(cards);
 
             } catch (err) {
-                console.error(err);
-                errorMsg.textContent = "Card not found. Please check your spelling.";
+                console.error("Unexpected error:", err);
+                errorMsg.textContent = "Error fetching data.";
                 errorMsg.classList.remove('hidden');
                 loader.classList.add('hidden');
             }
@@ -266,32 +691,28 @@
 
         function renderSuggestions(cards) {
             const suggestionsDiv = document.getElementById('suggestions');
-            suggestionsDiv.innerHTML = ''; // Clear previous
+            if (!suggestionsDiv) return;
+            suggestionsDiv.innerHTML = ''; 
 
-            // If we only have 1 card, no need for suggestions
             if (cards.length <= 1) return;
-
             suggestionsDiv.classList.remove('hidden');
 
+            // 1. Add the Title/Label
             const title = document.createElement('div');
-            title.className = "w-full text-center text-xs text-gray-400 mb-1 uppercase tracking-wide";
-            title.textContent = "Related Cards / Did you mean:";
+            title.className = "suggestions-title"; // Use CSS class for styling
+            title.textContent = "RELATED:";
             suggestionsDiv.appendChild(title);
 
-            // Limit to 8 suggestions to prevent UI clutter
-            const suggestions = cards.slice(1, 9);
-
+            // 2. Add the Chips (Inline)
+            const suggestions = cards.slice(1, 7);
             suggestions.forEach(card => {
                 const btn = document.createElement('button');
-                btn.className = "bg-gray-700 hover:bg-yellow-600 hover:text-black text-white text-xs px-3 py-1.5 rounded-full transition-all border border-gray-600 shadow-sm";
+                btn.className = "bg-gray-800 hover:bg-yellow-600 hover:text-black text-white text-[10px] px-2 py-1 rounded-full border border-gray-600 font-semibold truncate max-w-[100px]";
                 btn.textContent = card.name;
-                
-                // Clicking a suggestion searches for that exact card
                 btn.onclick = () => {
                     document.getElementById('searchInput').value = card.name;
                     searchCard();
                 };
-                
                 suggestionsDiv.appendChild(btn);
             });
         }
@@ -309,21 +730,24 @@
             imgPreloader.onload = () => {
                 loader.classList.add('hidden');
                 cardImg.src = imageUrl;
-                
-                // Force Reflow to restart animation from the beginning
                 void cardInner.offsetWidth; 
-                
-                // Start animation (Flips from Back to Front)
                 cardInner.classList.add('summon-animation');
 
-                // Update text details
                 document.getElementById('cardName').textContent = card.name;
-                document.getElementById('cardType').textContent = card.type;
+                document.getElementById('cardType').textContent = card.type.toUpperCase();
                 document.getElementById('cardDesc').textContent = card.desc;
                 document.getElementById('cardRace').textContent = card.race;
 
                 const monsterStats = document.getElementById('monsterStats');
                 const cardLevelSpan = document.getElementById('cardLevelSpan');
+                const cardAttributeSpan = document.getElementById('cardAttributeSpan');
+
+                if (card.attribute) {
+                    cardAttributeSpan.classList.remove('hidden');
+                    document.getElementById('cardAttribute').textContent = card.attribute;
+                } else {
+                    cardAttributeSpan.classList.add('hidden');
+                }
                 
                 if (card.atk !== undefined) {
                     monsterStats.classList.remove('hidden');
@@ -335,7 +759,7 @@
 
                 if (card.level) {
                     cardLevelSpan.classList.remove('hidden');
-                    document.getElementById('cardLevel').textContent = "⭐".repeat(Math.min(card.level, 12));
+                    document.getElementById('cardLevel').textContent = "★".repeat(Math.min(card.level, 12));
                 } else {
                     cardLevelSpan.classList.add('hidden');
                 }
