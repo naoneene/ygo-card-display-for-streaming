@@ -63,7 +63,7 @@
             padding: 2% 2.5rem;
         }
 
-        /* --- UPPER HALF: LP Calculator & Timer --- */
+        /* --- UPPER HALF: LP Calculator & Timer (Compressed) --- */
         .lp-calculator-section {
             width: 100%;
             height: 40%; 
@@ -116,7 +116,12 @@
             width: 100%;
         }
 
-        .digit { display: inline-block; }
+        /* LP Digits */
+        .digit { 
+            display: inline-block; 
+            width: 0.75em; 
+            text-align: center;
+        }
         
         /* === LP Animation Styles - SMOOTH SLOT ROLL === */
         .digit.slot-animation {
@@ -167,8 +172,19 @@
             color: white;
             font-family: 'Oswald', sans-serif;
             text-shadow: none;
-            letter-spacing: 1px;
+            letter-spacing: 0.9px;
+            /* FIX: Ensure timer digits are rendered horizontally without shifting */
+            display: flex; 
+            justify-content: center;
         }
+        
+        .timer-display .timer-digit {
+            display: inline-block;
+            /* Set fixed width for all characters (numbers and colon) */
+            width: 0.50em; 
+            text-align: center;
+        }
+
 
         /* === Halve Button STYLES OVERHAUL (New Block Style) === */
         .halve-btn {
@@ -262,7 +278,6 @@
             aspect-ratio: 0.68; 
             position: relative; 
             z-index: 10; 
-            /* Added relative positioning to contain the loader */
         }
         
         /* --- LOADER CENTERING STYLES --- */
@@ -271,7 +286,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 50; /* Ensure loader is above card inner */
+            z-index: 50;
         }
         
         .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.8s; transform-style: preserve-3d; transform: rotateY(180deg); }
@@ -384,7 +399,9 @@
 
                         <!-- Center Timer -->
                         <div class="center-column">
-                            <div class="timer-display" id="timer">50:00</div>
+                            <div class="timer-display" id="timer">
+                                <!-- Content will be injected by renderTimerDigits -->
+                            </div>
                             <div class="flex gap-2">
                                 <button class="timer-btn active" id="timerToggleBtn" onclick="toggleTimer()">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
@@ -437,7 +454,7 @@
 
                 <!-- LOWER HALF: Search & Details -->
                 <div class="lower-section">
-                    <!-- Search Container (Modified order) -->
+                    <!-- Search -->
                     <div class="search-container">
                         
                         <!-- Search Input Bar (Element 1) -->
@@ -537,10 +554,25 @@
             }
         }
         
+        // NEW Helper function to render Timer as fixed-width digits/separators
+        function renderTimerDigits(timeString) {
+            const timerElement = document.getElementById('timer');
+            timerElement.innerHTML = '';
+            
+            // Loop through "MM:SS" (e.g., 50:00)
+            for (const char of timeString) {
+                const span = document.createElement('span');
+                span.className = 'timer-digit';
+                span.textContent = char;
+                timerElement.appendChild(span);
+            }
+        }
+        
         // Initialize LP display with digit spans
         document.addEventListener('DOMContentLoaded', () => {
             renderLP('lp1', lp1);
             renderLP('lp2', lp2);
+            // Initial call uses the new rendering function
             updateTimerDisplay();
         });
 
@@ -610,12 +642,15 @@
             document.getElementById('name2').value = "DUELIST 2";
         }
 
-        // --- TIMER LOGIC (Unchanged) ---
+        // --- TIMER LOGIC ---
         function updateTimerDisplay() {
             const minutes = Math.floor(timeRemaining / 60);
             const seconds = timeRemaining % 60;
-            document.getElementById('timer').textContent = 
+            const timeString = 
                 `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Use the new rendering function to prevent CLS
+            renderTimerDigits(timeString);
         }
 
         function toggleTimer() {
