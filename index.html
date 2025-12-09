@@ -63,7 +63,7 @@
             padding: 2% 2.5rem;
         }
 
-        /* --- UPPER HALF: LP Calculator & Timer (Compressed) --- */
+        /* --- UPPER HALF: LP Calculator & Timer --- */
         .lp-calculator-section {
             width: 100%;
             height: 40%; 
@@ -102,10 +102,10 @@
         
         /* RESTORED LP BOX SIZE */
         .score-box {
-            font-size: 2.8rem; /* RESTORED to large size */
+            font-size: 2.8rem; 
             font-weight: 900; 
             text-align: center; 
-            padding: 8px 0; /* RESTORED to large padding */
+            padding: 8px 0; 
             text-shadow: 0 2px 4px rgba(0,0,0,0.5); 
             font-family: 'Roboto', sans-serif;
             position: relative;
@@ -173,35 +173,29 @@
         /* === Halve Button STYLES OVERHAUL (New Block Style) === */
         .halve-btn {
             width: 40px; 
-            height: 100%; /* GUARANTEES HEIGHT MATCH */
+            height: 100%; 
             box-sizing: border-box;
-            
-            /* Visual Styling based on reference image */
             background: black;
-            border: 2px solid #fbbf24; /* Yellow border */
-            border-radius: 6px; /* Matched LP box rounding */
+            border: 2px solid #fbbf24; 
+            border-radius: 6px; 
             cursor: pointer;
             transition: all 0.1s; 
-            
-            /* Center content */
             display: flex;
             flex-direction: column; 
             align-items: center; 
             justify-content: center;
             line-height: 1;
-            
-            /* Text Styling */
             font-weight: 900; 
             color: #fbbf24;
             font-family: 'Oswald', sans-serif;
-            font-size: 0.8rem; /* REDUCED FONT SIZE */
-            text-shadow: none; /* REMOVED TEXT SHADOW/CHROMATIC EFFECT */
+            font-size: 0.8rem; 
+            text-shadow: none; 
         }
         /* Style the text inside the button */
         .halve-btn .fraction {
             display: block;
             line-height: 1;
-            margin: 0; /* Removed vertical margin to compress text slightly */
+            margin: 0; 
             padding: 0;
         }
         
@@ -262,7 +256,24 @@
         }
         
         /* --- 3D Card Structure --- */
-        .card-container { perspective: 1200px; width: 85%; aspect-ratio: 0.68; position: relative; z-index: 10; }
+        .card-container { 
+            perspective: 1200px; 
+            width: 85%; 
+            aspect-ratio: 0.68; 
+            position: relative; 
+            z-index: 10; 
+            /* Added relative positioning to contain the loader */
+        }
+        
+        /* --- LOADER CENTERING STYLES --- */
+        #loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50; /* Ensure loader is above card inner */
+        }
+        
         .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.8s; transform-style: preserve-3d; transform: rotateY(180deg); }
         .card-face { 
             position: absolute; width: 100%; height: 100%; 
@@ -312,8 +323,14 @@
             
             <!-- LEFT ZONE: Card Display (Below "CARD HIGHLIGHT") -->
             <div class="left-zone">
-                <div id="loader" class="hidden mb-6 border-4 border-t-yellow-500 rounded-full w-10 h-10 animate-spin"></div>
+
                 <div class="card-container" id="cardContainer">
+                    <!-- LOADER MOVED INSIDE CARD CONTAINER FOR RELATIVE CENTERING -->
+                    <div id="loader" class="hidden">
+                        <!-- Re-styled loader spinner -->
+                        <div class="border-4 border-t-yellow-500 rounded-full w-10 h-10 animate-spin"></div>
+                    </div>
+                    
                     <div id="cardInner" class="card-inner">
                         <div class="card-face card-front">
                             <img id="cardImg" src="" alt="">
