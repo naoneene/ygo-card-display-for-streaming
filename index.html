@@ -43,6 +43,29 @@
 
         .layout-container { display: flex; width: 100%; height: 100%; }
 
+        /* --- Application Header (Updated Style) --- */
+        .app-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8.8%; 
+            background-color: transparent; 
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            padding-left: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); 
+        }
+        
+        .header-title {
+            color: #E2E8F0; 
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.76rem; 
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
         /* --- Left Zone: Card Highlight --- */
         .left-zone {
             width: 23%;
@@ -50,7 +73,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-top: 18%; 
+            padding-top: calc(18% + 8.8%); 
         }
 
         /* --- Right Zone: Playmat --- */
@@ -61,13 +84,14 @@
             flex-direction: column;
             justify-content: space-between; 
             padding: 2% 2.5rem;
+            padding-top: calc(2% + 8.8%); 
         }
 
         /* --- UPPER HALF: LP Calculator & Timer (Compressed) --- */
         .lp-calculator-section {
             width: 100%;
-            height: 40%; 
-            padding-top: 2%; 
+            height: 35%; 
+            padding-top: 0; 
         }
 
         .lp-container {
@@ -86,7 +110,7 @@
         .name-input {
             background: #0f172a; border: 1px solid #334155; color: white;
             text-align: center; padding: 4px; 
-            border-radius: 6px; /* MATCH LP BOX ROUNDING */
+            border-radius: 6px; 
             font-family: 'Share Tech Mono', monospace; font-size: 0.8rem;
             letter-spacing: 1px; width: 100%; box-sizing: border-box;
             outline: none;
@@ -98,51 +122,56 @@
             border: 2px solid rgba(255,255,255,0.1);
             position: relative;
             flex: 1;
+            line-height: 1.2; 
         }
         
         /* RESTORED LP BOX SIZE */
         .score-box {
             font-size: 2.8rem; 
             font-weight: 900; 
-            text-align: center; 
             padding: 8px 0; 
             text-shadow: 0 2px 4px rgba(0,0,0,0.5); 
             font-family: 'Roboto', sans-serif;
-            position: relative;
-            line-height: 1.2; 
+            
             display: flex; 
             justify-content: center;
-            align-items: center;
-            width: 100%;
+            align-items: flex-start; /* Align digits to the top of the container */
+            height: 100%; 
         }
 
         /* LP Digits */
         .digit { 
             display: inline-block; 
-            width: 0.75em; 
+            width: 0.675em; 
             text-align: center;
         }
         
-        /* === LP Animation Styles - SMOOTH SLOT ROLL === */
-        .digit.slot-animation {
-            animation: slotRollSmooth 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; 
+        /* === ROLLING DIGIT STYLES === */
+        .digit-roll {
+            display: inline-block;
+            overflow: hidden;
+            width: 0.675em; 
+            height: 1.2em; 
+            position: relative;
         }
-        @keyframes slotRollSmooth {
-            0% { 
-                transform: translateY(-100%); 
-                opacity: 0; 
-                filter: blur(2px); 
-            } 
-            50% {
-                filter: blur(0);
-            }
-            100% { 
-                transform: translateY(0); 
-                opacity: 1; 
-                filter: blur(0);
-            } 
+        /* Stack containing all 10 numbers */
+        .digit-stack {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            /* REMOVED CSS TRANSITION: JS will handle transform change directly */
+            will-change: transform;
         }
-
+        /* Single number element within the stack */
+        .digit-item {
+            height: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1; 
+        }
+        
         /* PURGE GRADIENT: Solid colors only */
         .score-p1 { background: #003366; color: white; border-color: #004e82; }
         .score-p2 { background: #660000; color: white; border-color: #820014; }
@@ -173,20 +202,23 @@
             font-family: 'Oswald', sans-serif;
             text-shadow: none;
             letter-spacing: 0.9px;
-            /* FIX: Ensure timer digits are rendered horizontally without shifting */
             display: flex; 
             justify-content: center;
         }
         
-        .timer-display .timer-digit {
+        /* Timer Digits - Independent width control */
+        .timer-display .timer-digit-num {
             display: inline-block;
-            /* Set fixed width for all characters (numbers and colon) */
-            width: 0.50em; 
+            width: 0.55em; /* Standard width for numbers */
+            text-align: center;
+        }
+        .timer-display .timer-digit-sep {
+            display: inline-block;
+            width: 0.45em; /* Reduced width for colon/separator (18% reduction from 0.55em) */
             text-align: center;
         }
 
-
-        /* === Halve Button STYLES OVERHAUL (New Block Style) === */
+        /* === Halve Button STYLES OVERHAUL === */
         .halve-btn {
             width: 40px; 
             height: 100%; 
@@ -207,7 +239,6 @@
             font-size: 0.8rem; 
             text-shadow: none; 
         }
-        /* Style the text inside the button */
         .halve-btn .fraction {
             display: block;
             line-height: 1;
@@ -234,7 +265,7 @@
         /* --- LOWER HALF: Search & Details (Unchanged) --- */
         .lower-section {
             width: 100%;
-            height: 58%; 
+            height: 60%; 
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -334,6 +365,12 @@
 
     <!-- Virtual Rectangle Container (16:9 Frame) -->
     <div class="virtual-rectangle">
+        
+        <!-- APPLICATION HEADER -->
+        <header class="app-header">
+            <h1 class="header-title">YGOStreaming</h1>
+        </header>
+
         <div class="layout-container">
             
             <!-- LEFT ZONE: Card Display (Below "CARD HIGHLIGHT") -->
@@ -371,11 +408,7 @@
                                 <!-- Wrapper for overflow: hidden -->
                                 <div class="score-box-wrapper score-p1 flex-1">
                                     <div class="score-box" id="lp1">
-                                        <!-- Initial digit breakdown -->
-                                        <span class="digit">8</span>
-                                        <span class="digit">0</span>
-                                        <span class="digit">0</span>
-                                        <span class="digit">0</span>
+                                        <!-- Digits injected by renderLP -->
                                     </div>
                                 </div>
                                 <!-- Updated Halve Button -->
@@ -430,10 +463,7 @@
                                 <!-- Wrapper for overflow: hidden -->
                                 <div class="score-box-wrapper score-p2 flex-1">
                                     <div class="score-box" id="lp2">
-                                        <span class="digit">8</span>
-                                        <span class="digit">0</span>
-                                        <span class="digit">0</span>
-                                        <span class="digit">0</span>
+                                        <!-- Digits injected by renderLP -->
                                     </div>
                                 </div>
                             </div>
@@ -454,7 +484,7 @@
 
                 <!-- LOWER HALF: Search & Details -->
                 <div class="lower-section">
-                    <!-- Search -->
+                    <!-- Search Container (Modified order) -->
                     <div class="search-container">
                         
                         <!-- Search Input Bar (Element 1) -->
@@ -539,21 +569,166 @@
         let timerInterval;
         let timeRemaining = 50 * 60; // 50 minutes in seconds
         let isTimerRunning = false;
+        
+        const ANIMATION_DURATION_MS = 400; // Duration of the roll animation
 
-        // Helper function to render LP as individual digit spans
+        // Helper function to render LP as individual digit stacks
         function renderLP(id, value) {
             const element = document.getElementById(id);
-            const valueStr = value.toString();
+            const valueStr = value.toString().padStart(4, '0'); // Ensure 4 digits
             element.innerHTML = '';
             
+            // Generate a stack of 10 digits (0-9) for each LP position
             for (const char of valueStr) {
-                const span = document.createElement('span');
-                span.className = 'digit';
-                span.textContent = char;
-                element.appendChild(span);
+                const digitRollContainer = document.createElement('div');
+                digitRollContainer.className = 'digit-roll';
+                
+                const digitStack = document.createElement('div');
+                digitStack.className = 'digit-stack';
+                
+                // The stack contains digits 9, 8, 7, ..., 0 (total of 10 elements)
+                const digitsArray = Array.from({ length: 10 }, (_, i) => 9 - i); 
+
+                digitsArray.forEach(num => {
+                    const digitItem = document.createElement('div');
+                    digitItem.className = 'digit-item';
+                    digitItem.textContent = num.toString();
+                    digitStack.appendChild(digitItem);
+                });
+
+                // Calculate the initial transform to show the correct starting digit
+                const initialDigit = parseInt(char, 10);
+                const initialIndex = 9 - initialDigit;
+                // Use 1.2em as this matches the line-height of the .score-box container
+                digitStack.style.transform = `translateY(-${initialIndex * 1.2}em)`;
+                
+                digitRollContainer.appendChild(digitStack);
+                element.appendChild(digitRollContainer);
             }
         }
         
+        // Function to update LP with smooth counting animation
+        let animationFrames = {};
+
+        function animateLPChange(targetId, startLP, endLP, duration) {
+            const element = document.getElementById(targetId);
+            const stacks = element.querySelectorAll('.digit-stack');
+            
+            if (animationFrames[targetId]) {
+                cancelAnimationFrame(animationFrames[targetId]);
+            }
+
+            const startTime = performance.now();
+            let currentLP = startLP;
+            const diff = endLP - startLP;
+            const direction = diff > 0 ? 1 : -1;
+            const absoluteDiff = Math.abs(diff);
+            
+            // Apply CSS transition properties immediately before starting the frame loop
+            stacks.forEach(stack => {
+                stack.style.transition = `transform 0.05s linear`; // Use a quick linear transition for smooth frame updates
+            });
+
+            const step = () => {
+                const elapsed = performance.now() - startTime;
+                
+                // Calculate progress (0 to 1)
+                let progress = Math.min(1, elapsed / duration);
+                
+                // Calculate the current LP value based on progress
+                let animatedValue;
+                if (direction > 0) {
+                    animatedValue = Math.floor(startLP + absoluteDiff * progress);
+                } else {
+                    animatedValue = Math.ceil(startLP - absoluteDiff * progress);
+                }
+                
+                // Ensure the final value is exactly the target LP
+                if (progress === 1) {
+                    animatedValue = endLP;
+                }
+
+                // Update the visual display based on the animated value
+                const currentLPStr = animatedValue.toString().padStart(4, '0');
+
+                currentLPStr.split('').forEach((char, i) => {
+                    if (stacks[i]) {
+                        const digit = parseInt(char, 10);
+                        const targetIndex = 9 - digit;
+                        
+                        // Set the translation to the target digit for the frame
+                        stacks[i].style.transform = `translateY(-${targetIndex * 1.2}em)`;
+                    }
+                });
+
+                if (progress < 1) {
+                    animationFrames[targetId] = requestAnimationFrame(step);
+                } else {
+                    delete animationFrames[targetId];
+                    
+                    // Remove transition property after animation completes
+                    stacks.forEach(stack => {
+                        stack.style.transition = '';
+                    });
+                }
+            };
+
+            animationFrames[targetId] = requestAnimationFrame(step);
+        }
+        
+        // Helper function to handle LP updates from button clicks
+        function updateLP(player, amount) {
+            let startLP, targetLP, targetId;
+
+            if (player === 1) {
+                startLP = lp1;
+                targetId = 'lp1';
+            } else {
+                startLP = lp2;
+                targetId = 'lp2';
+            }
+            
+            targetLP = startLP + amount;
+            if (targetLP < 0) targetLP = 0;
+            
+            // Update the global state
+            if (player === 1) {
+                lp1 = targetLP;
+            } else {
+                lp2 = targetLP;
+            }
+
+            // Determine animation duration based on magnitude of change
+            const magnitude = Math.abs(amount);
+            const duration = Math.max(500, Math.min(3000, magnitude * 0.8)); // Slower animation
+            
+            // Re-render to ensure structure matches final length (if length changed)
+            renderLP(targetId, startLP);
+            
+            // Trigger the custom animation loop
+            animateLPChange(targetId, startLP, targetLP, duration);
+        }
+
+
+        function resetLP() {
+            const initialLP = 8000;
+            
+            // Animate P1 reset
+            const startLP1 = lp1;
+            lp1 = initialLP;
+            renderLP('lp1', startLP1);
+            animateLPChange('lp1', startLP1, initialLP, 1500);
+
+            // Animate P2 reset
+            const startLP2 = lp2;
+            lp2 = initialLP;
+            renderLP('lp2', startLP2);
+            animateLPChange('lp2', startLP2, initialLP, 1500);
+            
+            document.getElementById('name1').value = "DUELIST 1";
+            document.getElementById('name2').value = "DUELIST 2";
+        }
+
         // NEW Helper function to render Timer as fixed-width digits/separators
         function renderTimerDigits(timeString) {
             const timerElement = document.getElementById('timer');
@@ -562,85 +737,26 @@
             // Loop through "MM:SS" (e.g., 50:00)
             for (const char of timeString) {
                 const span = document.createElement('span');
-                span.className = 'timer-digit';
+                
+                // Determine class based on character
+                if (char === ':') {
+                    span.className = 'timer-digit-sep'; // Colon class (narrower)
+                } else {
+                    span.className = 'timer-digit-num'; // Digit class (standard width)
+                }
+                
                 span.textContent = char;
                 timerElement.appendChild(span);
             }
         }
         
-        // Initialize LP display with digit spans
+        // Initialize LP display with digit stacks on load
         document.addEventListener('DOMContentLoaded', () => {
             renderLP('lp1', lp1);
             renderLP('lp2', lp2);
-            // Initial call uses the new rendering function
             updateTimerDisplay();
         });
 
-        // Function to apply animation sequentially from right to left
-        function applySequentialSlotAnimation(id) {
-            const element = document.getElementById(id);
-            const digits = element.querySelectorAll('.digit');
-            
-            // Loop through digits from right to left (lowest to highest value)
-            for (let i = digits.length - 1; i >= 0; i--) {
-                const digit = digits[i];
-                // Apply a delay based on its position
-                const delay = (digits.length - 1 - i) * 75; // 75ms delay per digit
-
-                // Apply animation with the calculated delay
-                setTimeout(() => {
-                    digit.classList.remove('slot-animation');
-                    void digit.offsetWidth; // Trigger reflow
-                    digit.classList.add('slot-animation');
-                    
-                    // Remove animation class after it finishes
-                    setTimeout(() => {
-                        digit.classList.remove('slot-animation');
-                    }, 800); // Wait for animation duration (0.8s)
-                }, delay);
-            }
-        }
-
-        function updateLP(player, amount) {
-            let targetLP, targetId;
-            if (player === 1) {
-                targetLP = lp1;
-                targetId = 'lp1';
-            } else {
-                targetLP = lp2;
-                targetId = 'lp2';
-            }
-            
-            targetLP += amount;
-            if (targetLP < 0) targetLP = 0;
-            
-            if (player === 1) {
-                lp1 = targetLP;
-            } else {
-                lp2 = targetLP;
-            }
-            
-            // 1. Render the new digits (instantly replacing old ones)
-            renderLP(targetId, targetLP);
-            
-            // 2. Apply the sequential slot roll animation
-            applySequentialSlotAnimation(targetId);
-        }
-
-        function resetLP() {
-            lp1 = 8000;
-            lp2 = 8000;
-            
-            renderLP('lp1', lp1);
-            renderLP('lp2', lp2);
-            
-            // Apply animation for reset
-            applySequentialSlotAnimation('lp1');
-            applySequentialSlotAnimation('lp2');
-
-            document.getElementById('name1').value = "DUELIST 1";
-            document.getElementById('name2').value = "DUELIST 2";
-        }
 
         // --- TIMER LOGIC ---
         function updateTimerDisplay() {
