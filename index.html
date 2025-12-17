@@ -142,7 +142,7 @@
         /* LP Digits */
         .digit { 
             display: inline-block; 
-            width: 0.675em; 
+            width: 0.57em; 
             text-align: center;
         }
         
@@ -150,7 +150,7 @@
         .digit-roll {
             display: inline-block;
             overflow: hidden;
-            width: 0.675em; 
+            width: 0.57em; 
             height: 1.2em; 
             position: relative;
         }
@@ -160,7 +160,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            /* REMOVED CSS TRANSITION: JS will handle transform change directly */
+            /* Transition for smooth roll will be set dynamically by JS */
             will-change: transform;
         }
         /* Single number element within the stack */
@@ -206,7 +206,6 @@
             justify-content: center;
         }
         
-        /* Timer Digits - Independent width control */
         .timer-display .timer-digit-num {
             display: inline-block;
             width: 0.55em; /* Standard width for numbers */
@@ -214,7 +213,8 @@
         }
         .timer-display .timer-digit-sep {
             display: inline-block;
-            width: 0.45em; /* Reduced width for colon/separator (18% reduction from 0.55em) */
+            /* REDUCED by ~15% from 0.45em to 0.38em for tighter colon spacing */
+            width: 0.38em; 
             text-align: center;
         }
 
@@ -570,8 +570,6 @@
         let timeRemaining = 50 * 60; // 50 minutes in seconds
         let isTimerRunning = false;
         
-        const ANIMATION_DURATION_MS = 400; // Duration of the roll animation
-
         // Helper function to render LP as individual digit stacks
         function renderLP(id, value) {
             const element = document.getElementById(id);
@@ -618,62 +616,30 @@
                 cancelAnimationFrame(animationFrames[targetId]);
             }
 
-            const startTime = performance.now();
-            let currentLP = startLP;
-            const diff = endLP - startLP;
-            const direction = diff > 0 ? 1 : -1;
-            const absoluteDiff = Math.abs(diff);
+            // Target LP value string
+            const newLPStr = endLP.toString().padStart(4, '0'); 
             
-            // Apply CSS transition properties immediately before starting the frame loop
-            stacks.forEach(stack => {
-                stack.style.transition = `transform 0.05s linear`; // Use a quick linear transition for smooth frame updates
+            // 1. Calculate and apply the final transform for each digit
+            newLPStr.split('').forEach((char, i) => {
+                if (stacks[i]) {
+                    const newDigit = parseInt(char, 10);
+                    const targetIndex = 9 - newDigit;
+                    
+                    // Set smooth, fast-to-slow transition properties
+                    stacks[i].style.transition = `transform ${duration}ms cubic-bezier(0.2, 0.8, 0.8, 1)`; 
+                    // Stagger the start time of the transition by adding a delay property
+                    stacks[i].style.transitionDelay = `${i * 50}ms`; 
+                    stacks[i].style.transform = `translateY(-${targetIndex * 1.2}em)`;
+                }
             });
 
-            const step = () => {
-                const elapsed = performance.now() - startTime;
-                
-                // Calculate progress (0 to 1)
-                let progress = Math.min(1, elapsed / duration);
-                
-                // Calculate the current LP value based on progress
-                let animatedValue;
-                if (direction > 0) {
-                    animatedValue = Math.floor(startLP + absoluteDiff * progress);
-                } else {
-                    animatedValue = Math.ceil(startLP - absoluteDiff * progress);
-                }
-                
-                // Ensure the final value is exactly the target LP
-                if (progress === 1) {
-                    animatedValue = endLP;
-                }
-
-                // Update the visual display based on the animated value
-                const currentLPStr = animatedValue.toString().padStart(4, '0');
-
-                currentLPStr.split('').forEach((char, i) => {
-                    if (stacks[i]) {
-                        const digit = parseInt(char, 10);
-                        const targetIndex = 9 - digit;
-                        
-                        // Set the translation to the target digit for the frame
-                        stacks[i].style.transform = `translateY(-${targetIndex * 1.2}em)`;
-                    }
+            // 2. Clear transition properties after animation completes
+            setTimeout(() => {
+                stacks.forEach(stack => {
+                    stack.style.transition = '';
+                    stack.style.transitionDelay = ''; 
                 });
-
-                if (progress < 1) {
-                    animationFrames[targetId] = requestAnimationFrame(step);
-                } else {
-                    delete animationFrames[targetId];
-                    
-                    // Remove transition property after animation completes
-                    stacks.forEach(stack => {
-                        stack.style.transition = '';
-                    });
-                }
-            };
-
-            animationFrames[targetId] = requestAnimationFrame(step);
+            }, duration + 50 * newLPStr.length); 
         }
         
         // Helper function to handle LP updates from button clicks
@@ -699,31 +665,33 @@
             }
 
             // Determine animation duration based on magnitude of change
+            // Base factor 0.88 is 10% slower than the default 0.8 factor.
             const magnitude = Math.abs(amount);
-            const duration = Math.max(500, Math.min(3000, magnitude * 0.8)); // Slower animation
+            const duration = Math.max(500, Math.min(3000, magnitude * 0.88)); 
             
             // Re-render to ensure structure matches final length (if length changed)
             renderLP(targetId, startLP);
             
-            // Trigger the custom animation loop
+            // Trigger the smooth animation
             animateLPChange(targetId, startLP, targetLP, duration);
         }
 
 
         function resetLP() {
             const initialLP = 8000;
-            
+            const duration = 1650; 
+
             // Animate P1 reset
             const startLP1 = lp1;
             lp1 = initialLP;
             renderLP('lp1', startLP1);
-            animateLPChange('lp1', startLP1, initialLP, 1500);
+            animateLPChange('lp1', startLP1, initialLP, duration);
 
             // Animate P2 reset
             const startLP2 = lp2;
             lp2 = initialLP;
             renderLP('lp2', startLP2);
-            animateLPChange('lp2', startLP2, initialLP, 1500);
+            animateLPChange('lp2', startLP2, initialLP, duration);
             
             document.getElementById('name1').value = "DUELIST 1";
             document.getElementById('name2').value = "DUELIST 2";
