@@ -43,7 +43,7 @@
 
         .layout-container { display: flex; width: 100%; height: 100%; }
 
-        /* --- Application Header (Updated Style) --- */
+        /* --- Application Header --- */
         .app-header {
             position: absolute;
             top: 0;
@@ -87,7 +87,7 @@
             padding-top: calc(2% + 8.8%); 
         }
 
-        /* --- UPPER HALF: LP Calculator & Timer (Compressed) --- */
+        /* --- UPPER HALF: LP Calculator & Timer --- */
         .lp-calculator-section {
             width: 100%;
             height: 35%; 
@@ -106,7 +106,6 @@
 
         .player-column { flex: 1; display: flex; flex-direction: column; gap: 5px; }
 
-        /* Updated name input for consistent rounding */
         .name-input {
             background: #0f172a; border: 1px solid #334155; color: white;
             text-align: center; padding: 4px; 
@@ -123,29 +122,21 @@
             position: relative;
             flex: 1;
             line-height: 1.2; 
+            cursor: pointer;
         }
         
-        /* RESTORED LP BOX SIZE */
         .score-box {
             font-size: 2.8rem; 
             font-weight: 900; 
             padding: 8px 0; 
             text-shadow: 0 2px 4px rgba(0,0,0,0.5); 
             font-family: 'Roboto', sans-serif;
-            
             display: flex; 
             justify-content: center;
-            align-items: flex-start; /* Align digits to the top of the container */
+            align-items: flex-start;
             height: 100%; 
         }
 
-        /* LP Digits */
-        .digit { 
-            display: inline-block; 
-            width: 0.57em; 
-            text-align: center;
-        }
-        
         /* === ROLLING DIGIT STYLES === */
         .digit-roll {
             display: inline-block;
@@ -153,17 +144,26 @@
             width: 0.57em; 
             height: 1.2em; 
             position: relative;
+            /* Added transitions for leading zero hiding */
+            transition: width 0.4s cubic-bezier(0.2, 0.8, 0.8, 1), 
+                        opacity 0.4s cubic-bezier(0.2, 0.8, 0.8, 1),
+                        margin 0.4s cubic-bezier(0.2, 0.8, 0.8, 1);
         }
-        /* Stack containing all 10 numbers */
+        /* Class to hide leading zero roll */
+        .digit-roll.hidden-digit {
+            width: 0;
+            opacity: 0;
+            margin: 0;
+            pointer-events: none;
+        }
+
         .digit-stack {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            /* Transition for smooth roll will be set dynamically by JS */
             will-change: transform;
         }
-        /* Single number element within the stack */
         .digit-item {
             height: 1.2em;
             display: flex;
@@ -172,7 +172,6 @@
             line-height: 1; 
         }
         
-        /* PURGE GRADIENT: Solid colors only */
         .score-p1 { background: #003366; color: white; border-color: #004e82; }
         .score-p2 { background: #660000; color: white; border-color: #820014; }
 
@@ -194,7 +193,6 @@
 
         .center-column { width: 100px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
         
-        /* Updated Timer Display Styles */
         .timer-display {
             font-size: 2.2rem;
             font-weight: 700;
@@ -208,17 +206,15 @@
         
         .timer-display .timer-digit-num {
             display: inline-block;
-            width: 0.55em; /* Standard width for numbers */
+            width: 0.55em; 
             text-align: center;
         }
         .timer-display .timer-digit-sep {
             display: inline-block;
-            /* REDUCED by ~15% from 0.45em to 0.38em for tighter colon spacing */
             width: 0.38em; 
             text-align: center;
         }
 
-        /* === Halve Button STYLES OVERHAUL === */
         .halve-btn {
             width: 40px; 
             height: 100%; 
@@ -262,7 +258,6 @@
             padding: 4px 12px; border-radius: 12px; font-weight: bold; cursor: pointer;
         }
         
-        /* --- LOWER HALF: Search & Details (Unchanged) --- */
         .lower-section {
             width: 100%;
             height: 60%; 
@@ -273,7 +268,6 @@
             padding-bottom: 2%; 
         }
         
-        /* --- Search Bar Container --- */
         .search-container {
             width: 100%; 
             max-width: 650px; 
@@ -282,7 +276,6 @@
             gap: 5px;
             margin-bottom: 0.75rem; 
         }
-        /* --- Suggestions Styling --- */
         .suggestions-line {
             display: flex;
             align-items: center; 
@@ -302,16 +295,8 @@
             white-space: nowrap;
         }
         
-        /* --- 3D Card Structure --- */
-        .card-container { 
-            perspective: 1200px; 
-            width: 85%; 
-            aspect-ratio: 0.68; 
-            position: relative; 
-            z-index: 10; 
-        }
+        .card-container { perspective: 1200px; width: 85%; aspect-ratio: 0.68; position: relative; z-index: 10; }
         
-        /* --- LOADER CENTERING STYLES --- */
         #loader {
             position: absolute;
             top: 50%;
@@ -333,7 +318,6 @@
         .summon-animation { animation: spinRealCard 3s cubic-bezier(0.1, 0.7, 0.1, 1) forwards; }
         @keyframes spinRealCard { 0% { transform: rotateY(180deg); } 100% { transform: rotateY(720deg); } }
 
-        /* --- Card Info Panel (Unchanged) --- */
         .style-card-panel {
             background-color: #0f172a; border: 1px solid #1e293b; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
             width: 100%; max-width: 650px; height: 200px;
@@ -353,7 +337,6 @@
             font-size: 0.85rem; line-height: 1.4; flex: 1; overflow-y: auto;
         }
         
-        /* Custom Scrollbars */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #1e293b; }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
@@ -363,26 +346,43 @@
 </head>
 <body>
 
-    <!-- Virtual Rectangle Container (16:9 Frame) -->
+    <!-- Manual LP Adjustment Modal -->
+    <div id="manualLpModal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-sm border border-gray-700">
+            <h2 class="text-xl font-bold text-white mb-4" id="modalTitle">Adjust LP for DUELIST</h2>
+            
+            <input 
+                type="text" 
+                id="lpInput" 
+                placeholder="Ex: 8000, +500, -1200" 
+                class="w-full p-3 bg-gray-900 border border-gray-600 text-white rounded-lg text-center text-2xl mb-4 focus:border-yellow-500 appearance-none font-mono"
+                onkeypress="if(event.key === 'Enter') processManualLp('calculate')"
+            >
+
+            <div class="flex flex-col gap-3">
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="document.getElementById('lpInput').value = '4000'; document.getElementById('lpInput').focus();" class="bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg font-bold text-sm">SET 4000</button>
+                    <button onclick="document.getElementById('lpInput').value = '8000'; document.getElementById('lpInput').focus();" class="bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg font-bold text-sm">SET 8000</button>
+                    <button onclick="document.getElementById('lpInput').value = '+100'; document.getElementById('lpInput').focus();" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-bold text-sm">+100</button>
+                </div>
+                <button onclick="processManualLp('calculate')" class="bg-yellow-600 hover:bg-yellow-700 text-black py-3 rounded-lg font-bold text-lg transition-all">APPLY (SET / +/-)</button>
+            </div>
+            
+            <button onclick="closeManualLp()" class="w-full mt-4 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg text-sm">Close</button>
+        </div>
+    </div>
+
     <div class="virtual-rectangle">
-        
-        <!-- APPLICATION HEADER -->
         <header class="app-header">
             <h1 class="header-title">YGOStreaming</h1>
         </header>
 
         <div class="layout-container">
-            
-            <!-- LEFT ZONE: Card Display (Below "CARD HIGHLIGHT") -->
             <div class="left-zone">
-
                 <div class="card-container" id="cardContainer">
-                    <!-- LOADER MOVED INSIDE CARD CONTAINER FOR RELATIVE CENTERING -->
                     <div id="loader" class="hidden">
-                        <!-- Re-styled loader spinner -->
                         <div class="border-4 border-t-yellow-500 rounded-full w-10 h-10 animate-spin"></div>
                     </div>
-                    
                     <div id="cardInner" class="card-inner">
                         <div class="card-face card-front">
                             <img id="cardImg" src="" alt="">
@@ -394,24 +394,16 @@
                 </div>
             </div>
 
-            <!-- RIGHT ZONE: Playmat Area (Split Top/Bottom) -->
             <div class="right-zone">
-                
-                <!-- UPPER HALF: LP Calculator & Timer -->
                 <div class="lp-calculator-section">
                     <div class="lp-container">
-                        
                         <!-- Player 1 -->
                         <div class="player-column">
                             <input type="text" value="DUELIST 1" class="name-input" id="name1">
                             <div class="flex items-stretch gap-2">
-                                <!-- Wrapper for overflow: hidden -->
-                                <div class="score-box-wrapper score-p1 flex-1">
-                                    <div class="score-box" id="lp1">
-                                        <!-- Digits injected by renderLP -->
-                                    </div>
+                                <div class="score-box-wrapper score-p1 flex-1" onclick="openManualLp(1)">
+                                    <div class="score-box" id="lp1"></div>
                                 </div>
-                                <!-- Updated Halve Button -->
                                 <button class="halve-btn" onclick="updateLP(1, -Math.floor(lp1 / 2))">
                                     <div class="fraction">1</div>
                                     <div class="fraction">/</div>
@@ -430,11 +422,8 @@
                             </div>
                         </div>
 
-                        <!-- Center Timer -->
                         <div class="center-column">
-                            <div class="timer-display" id="timer">
-                                <!-- Content will be injected by renderTimerDigits -->
-                            </div>
+                            <div class="timer-display" id="timer"></div>
                             <div class="flex gap-2">
                                 <button class="timer-btn active" id="timerToggleBtn" onclick="toggleTimer()">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
@@ -454,17 +443,13 @@
                         <div class="player-column">
                             <input type="text" value="DUELIST 2" class="name-input" id="name2">
                             <div class="flex items-stretch gap-2">
-                                <!-- Halve button is now same height as score-box content -->
                                 <button class="halve-btn" onclick="updateLP(2, -Math.floor(lp2 / 2))">
                                     <div class="fraction">1</div>
                                     <div class="fraction">/</div>
                                     <div class="fraction">2</div>
                                 </button>
-                                <!-- Wrapper for overflow: hidden -->
-                                <div class="score-box-wrapper score-p2 flex-1">
-                                    <div class="score-box" id="lp2">
-                                        <!-- Digits injected by renderLP -->
-                                    </div>
+                                <div class="score-box-wrapper score-p2 flex-1" onclick="openManualLp(2)">
+                                    <div class="score-box" id="lp2"></div>
                                 </div>
                             </div>
                             <div class="btn-grid">
@@ -478,115 +463,77 @@
                                 <button class="lp-btn btn-sub" onclick="updateLP(2, -50)">- <span>50</span></button>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
-                <!-- LOWER HALF: Search & Details -->
                 <div class="lower-section">
-                    <!-- Search Container (Modified order) -->
                     <div class="search-container">
-                        
-                        <!-- Search Input Bar (Element 1) -->
                         <div class="relative flex items-center shadow-lg">
-                            <input 
-                                type="text" 
-                                id="searchInput" 
-                                placeholder="Search card name..." 
-                                class="w-full bg-gray-900 border-2 border-gray-700 text-white px-3 py-2 rounded-l-lg focus:border-yellow-500 transition-all placeholder-gray-500 font-medium text-sm"
-                                onkeypress="handleKeyPress(event)"
-                            >
-                            <button 
-                                onclick="searchCard()" 
-                                class="bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-2 px-5 rounded-r-lg transition-all border-2 border-l-0 border-yellow-700 cursor-pointer text-sm"
-                            >
-                                Search
-                            </button>
+                            <input type="text" id="searchInput" placeholder="Search card name..." class="w-full bg-gray-900 border-2 border-gray-700 text-white px-3 py-2 rounded-l-lg focus:border-yellow-500 transition-all placeholder-gray-500 font-medium text-sm" onkeypress="handleKeyPress(event)">
+                            <button onclick="searchCard()" class="bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-2 px-5 rounded-r-lg transition-all border-2 border-l-0 border-yellow-700 cursor-pointer text-sm">Search</button>
                         </div>
-                        
                         <p id="errorMsg" class="text-red-600 text-xs font-bold hidden bg-white/80 p-1 rounded text-center"></p>
-
-                        <!-- Suggestions Area (Moved BELOW Search Input - Element 2) -->
                         <div id="suggestions" class="hidden suggestions-line">
-                            <!-- Title moved inside the wrapper -->
                             <div class="suggestions-title">RELATED:</div>
-                            <!-- Chips injected via JS -->
                         </div>
                     </div>
 
-                    <!-- Details -->
                     <div id="cardDetails" class="hidden w-full max-w-3xl style-card-panel p-4 rounded-lg animate-fade-in-up relative z-10 select-text">
-                        
-                        <!-- Header: Name and Type Badge -->
                         <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-2">
                             <h2 id="cardName" class="text-2xl font-bold text-gold yugioh-font tracking-wide truncate pr-2"></h2>
                             <span id="cardType" class="px-2 py-0.5 bg-gray-700 text-gray-300 text-xs font-bold uppercase rounded border border-gray-600 whitespace-nowrap"></span>
                         </div>
-                        
-                        <!-- Stats Row -->
                         <div class="flex flex-wrap items-center justify-between gap-3 mb-2 text-xs">
-                            
-                            <!-- Left: ATK / DEF -->
                             <div id="monsterStats" class="hidden flex gap-2">
-                                <div class="stat-box">
-                                    ATK <span class="text-gray-500">/</span> <span id="atkVal" class="stat-value"></span>
-                                </div>
-                                <div class="stat-box">
-                                    DEF <span class="text-gray-500">/</span> <span id="defVal" class="stat-value-def"></span>
-                                </div>
+                                <div class="stat-box">ATK <span class="text-gray-500">/</span> <span id="atkVal" class="stat-value"></span></div>
+                                <div class="stat-box">DEF <span class="text-gray-500">/</span> <span id="defVal" class="stat-value-def"></span></div>
                             </div>
-
-                            <!-- Right: Type / Attr / Level -->
                             <div class="flex items-center gap-3 text-gray-400 font-medium ml-auto">
-                                <!-- Type -->
                                 <span>Type: <span id="cardRace" class="text-white"></span></span>
-                                
-                                <!-- Attribute -->
                                 <span id="cardAttributeSpan" class="hidden">Attr: <span id="cardAttribute" class="font-bold text-white uppercase"></span></span>
-                                
-                                <!-- Level -->
-                                <span id="cardLevelSpan" class="hidden flex items-center gap-1">
-                                    Lv: <span id="cardLevel" class="text-gold text-base leading-none tracking-widest"></span>
-                                </span>
+                                <span id="cardLevelSpan" class="hidden flex items-center gap-1">Lv: <span id="cardLevel" class="text-gold text-base leading-none tracking-widest"></span></span>
                             </div>
                         </div>
-
-                        <!-- Description Box (Scrollable) -->
                         <div class="desc-box rounded">
                             <p id="cardDesc"></p>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
-    </div> <!-- End Virtual Rectangle -->
+    </div>
 
     <script>
-        // --- CALCULATOR LOGIC ---
         let lp1 = 8000;
         let lp2 = 8000;
         let timerInterval;
-        let timeRemaining = 50 * 60; // 50 minutes in seconds
+        let timeRemaining = 50 * 60;
         let isTimerRunning = false;
-        
-        // Helper function to render LP as individual digit stacks
+        let currentManualLpPlayer = 0;
+        let animationFrames = {};
+
+        // Helper to render stacks and handle "show 500 instead of 0500" logic
         function renderLP(id, value) {
             const element = document.getElementById(id);
-            const valueStr = value.toString().padStart(4, '0'); // Ensure 4 digits
+            const fullStr = value.toString().padStart(4, '0');
+            const visibleStr = value.toString(); // e.g. "500"
             element.innerHTML = '';
             
-            // Generate a stack of 10 digits (0-9) for each LP position
-            for (const char of valueStr) {
+            for (let i = 0; i < 4; i++) {
+                const char = fullStr[i];
                 const digitRollContainer = document.createElement('div');
                 digitRollContainer.className = 'digit-roll';
                 
+                // Hide leading zeros (but always show at least one digit for '0')
+                // Logic: Hide if current index is < (4 - actual length)
+                if (i < (4 - visibleStr.length)) {
+                    digitRollContainer.classList.add('hidden-digit');
+                }
+
                 const digitStack = document.createElement('div');
                 digitStack.className = 'digit-stack';
                 
-                // The stack contains digits 9, 8, 7, ..., 0 (total of 10 elements)
-                const digitsArray = Array.from({ length: 10 }, (_, i) => 9 - i); 
-
+                const digitsArray = Array.from({ length: 10 }, (_, idx) => 9 - idx); 
                 digitsArray.forEach(num => {
                     const digitItem = document.createElement('div');
                     digitItem.className = 'digit-item';
@@ -594,10 +541,8 @@
                     digitStack.appendChild(digitItem);
                 });
 
-                // Calculate the initial transform to show the correct starting digit
                 const initialDigit = parseInt(char, 10);
                 const initialIndex = 9 - initialDigit;
-                // Use 1.2em as this matches the line-height of the .score-box container
                 digitStack.style.transform = `translateY(-${initialIndex * 1.2}em)`;
                 
                 digitRollContainer.appendChild(digitStack);
@@ -605,162 +550,142 @@
             }
         }
         
-        // Function to update LP with smooth counting animation
-        let animationFrames = {};
-
         function animateLPChange(targetId, startLP, endLP, duration) {
             const element = document.getElementById(targetId);
             const stacks = element.querySelectorAll('.digit-stack');
+            const rolls = element.querySelectorAll('.digit-roll');
             
-            if (animationFrames[targetId]) {
-                cancelAnimationFrame(animationFrames[targetId]);
-            }
+            if (animationFrames[targetId]) cancelAnimationFrame(animationFrames[targetId]);
 
-            // Target LP value string
-            const newLPStr = endLP.toString().padStart(4, '0'); 
+            const startTime = performance.now();
             
-            // 1. Calculate and apply the final transform for each digit
-            newLPStr.split('').forEach((char, i) => {
-                if (stacks[i]) {
-                    const newDigit = parseInt(char, 10);
-                    const targetIndex = 9 - newDigit;
-                    
-                    // Set smooth, fast-to-slow transition properties
-                    stacks[i].style.transition = `transform ${duration}ms cubic-bezier(0.2, 0.8, 0.8, 1)`; 
-                    // Stagger the start time of the transition by adding a delay property
-                    stacks[i].style.transitionDelay = `${i * 50}ms`; 
-                    stacks[i].style.transform = `translateY(-${targetIndex * 1.2}em)`;
+            const step = (now) => {
+                const elapsed = now - startTime;
+                let progress = Math.min(1, elapsed / duration);
+                
+                // Fast-to-slow easing logic (Cubic Out equivalent)
+                const easedProgress = 1 - Math.pow(1 - progress, 3);
+                
+                const diff = endLP - startLP;
+                const animatedValue = Math.round(startLP + diff * easedProgress);
+                
+                const fullStr = animatedValue.toString().padStart(4, '0');
+                const visibleStr = animatedValue.toString();
+
+                for (let i = 0; i < 4; i++) {
+                    if (stacks[i]) {
+                        const digit = parseInt(fullStr[i], 10);
+                        const targetIndex = 9 - digit;
+                        stacks[i].style.transform = `translateY(-${targetIndex * 1.2}em)`;
+                        
+                        // Handle visibility toggle for leading zeros
+                        const shouldBeHidden = i < (4 - visibleStr.length);
+                        if (shouldBeHidden) {
+                            rolls[i].classList.add('hidden-digit');
+                        } else {
+                            rolls[i].classList.remove('hidden-digit');
+                        }
+                    }
                 }
-            });
 
-            // 2. Clear transition properties after animation completes
-            setTimeout(() => {
-                stacks.forEach(stack => {
-                    stack.style.transition = '';
-                    stack.style.transitionDelay = ''; 
-                });
-            }, duration + 50 * newLPStr.length); 
+                if (progress < 1) {
+                    animationFrames[targetId] = requestAnimationFrame(step);
+                } else {
+                    delete animationFrames[targetId];
+                }
+            };
+
+            animationFrames[targetId] = requestAnimationFrame(step);
         }
         
-        // Helper function to handle LP updates from button clicks
-        function updateLP(player, amount) {
+        function updateLP(player, amountOrTarget, isSet = false) {
             let startLP, targetLP, targetId;
-
-            if (player === 1) {
-                startLP = lp1;
-                targetId = 'lp1';
-            } else {
-                startLP = lp2;
-                targetId = 'lp2';
-            }
+            if (player === 1) { startLP = lp1; targetId = 'lp1'; } 
+            else { startLP = lp2; targetId = 'lp2'; }
             
-            targetLP = startLP + amount;
-            if (targetLP < 0) targetLP = 0;
+            if (isSet) targetLP = Math.max(0, amountOrTarget);
+            else targetLP = Math.max(0, startLP + amountOrTarget);
             
-            // Update the global state
-            if (player === 1) {
-                lp1 = targetLP;
-            } else {
-                lp2 = targetLP;
-            }
+            if (startLP === targetLP) return;
 
-            // Determine animation duration based on magnitude of change
-            // Base factor 0.88 is 10% slower than the default 0.8 factor.
-            const magnitude = Math.abs(amount);
+            if (player === 1) lp1 = targetLP; else lp2 = targetLP;
+
+            const magnitude = Math.abs(targetLP - startLP);
+            // 0.88 factor is ~10% slower than typical 0.8
             const duration = Math.max(500, Math.min(3000, magnitude * 0.88)); 
             
-            // Re-render to ensure structure matches final length (if length changed)
-            renderLP(targetId, startLP);
-            
-            // Trigger the smooth animation
             animateLPChange(targetId, startLP, targetLP, duration);
         }
 
-
         function resetLP() {
-            const initialLP = 8000;
-            const duration = 1650; 
-
-            // Animate P1 reset
-            const startLP1 = lp1;
-            lp1 = initialLP;
-            renderLP('lp1', startLP1);
-            animateLPChange('lp1', startLP1, initialLP, duration);
-
-            // Animate P2 reset
-            const startLP2 = lp2;
-            lp2 = initialLP;
-            renderLP('lp2', startLP2);
-            animateLPChange('lp2', startLP2, initialLP, duration);
-            
+            const startLP1 = lp1, startLP2 = lp2;
+            lp1 = 8000; lp2 = 8000;
+            animateLPChange('lp1', startLP1, 8000, 1650);
+            animateLPChange('lp2', startLP2, 8000, 1650);
             document.getElementById('name1').value = "DUELIST 1";
             document.getElementById('name2').value = "DUELIST 2";
         }
 
-        // NEW Helper function to render Timer as fixed-width digits/separators
+        function openManualLp(player) {
+            currentManualLpPlayer = player;
+            const name = document.getElementById(`name${player}`).value;
+            document.getElementById('modalTitle').textContent = `Adjust LP for ${name}`;
+            document.getElementById('lpInput').value = '';
+            document.getElementById('manualLpModal').classList.remove('hidden');
+            document.getElementById('lpInput').focus();
+        }
+
+        function closeManualLp() {
+            document.getElementById('manualLpModal').classList.add('hidden');
+            currentManualLpPlayer = 0;
+        }
+
+        function processManualLp(action) {
+            const input = document.getElementById('lpInput').value.trim();
+            if (!input) return;
+
+            if (input.startsWith('+') || input.startsWith('-')) {
+                const adj = parseInt(input);
+                if (!isNaN(adj)) updateLP(currentManualLpPlayer, adj, false);
+            } else {
+                const val = parseInt(input);
+                if (!isNaN(val)) updateLP(currentManualLpPlayer, val, true);
+            }
+            closeManualLp();
+        }
+
         function renderTimerDigits(timeString) {
             const timerElement = document.getElementById('timer');
             timerElement.innerHTML = '';
-            
-            // Loop through "MM:SS" (e.g., 50:00)
             for (const char of timeString) {
                 const span = document.createElement('span');
-                
-                // Determine class based on character
-                if (char === ':') {
-                    span.className = 'timer-digit-sep'; // Colon class (narrower)
-                } else {
-                    span.className = 'timer-digit-num'; // Digit class (standard width)
-                }
-                
+                span.className = char === ':' ? 'timer-digit-sep' : 'timer-digit-num';
                 span.textContent = char;
                 timerElement.appendChild(span);
             }
         }
         
-        // Initialize LP display with digit stacks on load
-        document.addEventListener('DOMContentLoaded', () => {
-            renderLP('lp1', lp1);
-            renderLP('lp2', lp2);
-            updateTimerDisplay();
-        });
-
-
-        // --- TIMER LOGIC ---
         function updateTimerDisplay() {
-            const minutes = Math.floor(timeRemaining / 60);
-            const seconds = timeRemaining % 60;
-            const timeString = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            // Use the new rendering function to prevent CLS
-            renderTimerDigits(timeString);
+            const mins = Math.floor(timeRemaining / 60);
+            const secs = timeRemaining % 60;
+            renderTimerDigits(`${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`);
         }
 
         function toggleTimer() {
             const btn = document.getElementById('timerToggleBtn');
-            const iconPath = btn.querySelector('path');
-            
+            const path = btn.querySelector('path');
             if (isTimerRunning) {
                 clearInterval(timerInterval);
                 isTimerRunning = false;
                 btn.classList.add('active'); 
-                // Play Icon
-                iconPath.setAttribute('d', "M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z");
+                path.setAttribute('d', "M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z");
             } else {
                 isTimerRunning = true;
                 btn.classList.remove('active');
-                // Pause Icon
-                iconPath.setAttribute('d', "M15.75 5.25v13.5m-7.5-13.5v13.5");
-                
+                path.setAttribute('d', "M15.75 5.25v13.5m-7.5-13.5v13.5");
                 timerInterval = setInterval(() => {
-                    if (timeRemaining > 0) {
-                        timeRemaining--;
-                        updateTimerDisplay();
-                    } else {
-                        clearInterval(timerInterval);
-                        isTimerRunning = false;
-                    }
+                    if (timeRemaining > 0) { timeRemaining--; updateTimerDisplay(); } 
+                    else { clearInterval(timerInterval); isTimerRunning = false; }
                 }, 1000);
             }
         }
@@ -770,141 +695,93 @@
             isTimerRunning = false;
             timeRemaining = 50 * 60;
             updateTimerDisplay();
-            
             const btn = document.getElementById('timerToggleBtn');
-            const iconPath = btn.querySelector('path');
             btn.classList.add('active');
-            iconPath.setAttribute('d', "M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z");
+            btn.querySelector('path').setAttribute('d', "M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z");
         }
         
-        // --- CARD SEARCH LOGIC (Unchanged) ---
         const API_URL = "https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=";
-
-        function handleKeyPress(event) {
-            if (event.key === 'Enter') searchCard();
-        }
+        function handleKeyPress(e) { if (e.key === 'Enter') searchCard(); }
 
         async function searchCard() {
-            const input = document.getElementById('searchInput');
-            const query = input.value.trim();
-            const errorMsg = document.getElementById('errorMsg');
-            const loader = document.getElementById('loader');
-            const cardInner = document.getElementById('cardInner');
-            const cardDetails = document.getElementById('cardDetails');
-            const suggestionsDiv = document.getElementById('suggestions');
-
+            const query = document.getElementById('searchInput').value.trim();
             if (!query) return;
-
-            errorMsg.classList.add('hidden');
-            cardDetails.classList.add('hidden');
-            if (suggestionsDiv) suggestionsDiv.classList.add('hidden'); 
-            cardInner.classList.remove('summon-animation');
-            loader.classList.remove('hidden');
+            document.getElementById('errorMsg').classList.add('hidden');
+            document.getElementById('cardDetails').classList.add('hidden');
+            document.getElementById('suggestions').classList.add('hidden');
+            document.getElementById('cardInner').classList.remove('summon-animation');
+            document.getElementById('loader').classList.remove('hidden');
 
             try {
-                const response = await fetch(`${API_URL}${encodeURIComponent(query)}`);
-                const data = await response.json();
-
+                const res = await fetch(`${API_URL}${encodeURIComponent(query)}`);
+                const data = await res.json();
                 if (data.error) {
-                    errorMsg.textContent = "No card found with that name. Check spelling.";
-                    errorMsg.classList.remove('hidden');
-                    loader.classList.add('hidden');
-                    return;
+                    document.getElementById('errorMsg').textContent = "No card found.";
+                    document.getElementById('errorMsg').classList.remove('hidden');
+                    document.getElementById('loader').classList.add('hidden');
+                } else {
+                    renderCard(data.data[0]);
+                    renderSuggestions(data.data);
                 }
-
-                const cards = data.data;
-                const exactMatch = cards[0];
-                renderCard(exactMatch);
-                renderSuggestions(cards);
-
             } catch (err) {
-                console.error("Unexpected error:", err);
-                errorMsg.textContent = "Error fetching data.";
-                errorMsg.classList.remove('hidden');
-                loader.classList.add('hidden');
+                document.getElementById('loader').classList.add('hidden');
             }
         }
 
         function renderSuggestions(cards) {
-            const suggestionsDiv = document.getElementById('suggestions');
-            if (!suggestionsDiv) return;
-            suggestionsDiv.innerHTML = ''; 
-
+            const div = document.getElementById('suggestions');
+            div.innerHTML = '<div class="suggestions-title">RELATED:</div>';
             if (cards.length <= 1) return;
-            suggestionsDiv.classList.remove('hidden');
-
-            // 1. Add the Title/Label
-            const title = document.createElement('div');
-            title.className = "suggestions-title"; // Use CSS class for styling
-            title.textContent = "RELATED:";
-            suggestionsDiv.appendChild(title);
-
-            // 2. Add the Chips (Inline)
-            const suggestions = cards.slice(1, 7);
-            suggestions.forEach(card => {
+            div.classList.remove('hidden');
+            cards.slice(1, 7).forEach(card => {
                 const btn = document.createElement('button');
                 btn.className = "bg-gray-800 hover:bg-yellow-600 hover:text-black text-white text-[10px] px-2 py-1 rounded-full border border-gray-600 font-semibold truncate max-w-[100px]";
                 btn.textContent = card.name;
-                btn.onclick = () => {
-                    document.getElementById('searchInput').value = card.name;
-                    searchCard();
-                };
-                suggestionsDiv.appendChild(btn);
+                btn.onclick = () => { document.getElementById('searchInput').value = card.name; searchCard(); };
+                div.appendChild(btn);
             });
         }
 
         function renderCard(card) {
-            const loader = document.getElementById('loader');
-            const cardInner = document.getElementById('cardInner');
-            const cardImg = document.getElementById('cardImg');
-            const cardDetails = document.getElementById('cardDetails');
-
-            const imageUrl = card.card_images[0].image_url;
-            const imgPreloader = new Image();
-            imgPreloader.src = imageUrl;
-            
-            imgPreloader.onload = () => {
-                loader.classList.add('hidden');
-                cardImg.src = imageUrl;
-                void cardInner.offsetWidth; 
-                cardInner.classList.add('summon-animation');
+            const img = new Image();
+            img.src = card.card_images[0].image_url;
+            img.onload = () => {
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('cardImg').src = img.src;
+                const inner = document.getElementById('cardInner');
+                void inner.offsetWidth;
+                inner.classList.add('summon-animation');
 
                 document.getElementById('cardName').textContent = card.name;
                 document.getElementById('cardType').textContent = card.type.toUpperCase();
                 document.getElementById('cardDesc').textContent = card.desc;
                 document.getElementById('cardRace').textContent = card.race;
 
-                const monsterStats = document.getElementById('monsterStats');
-                const cardLevelSpan = document.getElementById('cardLevelSpan');
-                const cardAttributeSpan = document.getElementById('cardAttributeSpan');
-
                 if (card.attribute) {
-                    cardAttributeSpan.classList.remove('hidden');
+                    document.getElementById('cardAttributeSpan').classList.remove('hidden');
                     document.getElementById('cardAttribute').textContent = card.attribute;
-                } else {
-                    cardAttributeSpan.classList.add('hidden');
-                }
+                } else document.getElementById('cardAttributeSpan').classList.add('hidden');
                 
                 if (card.atk !== undefined) {
-                    monsterStats.classList.remove('hidden');
+                    document.getElementById('monsterStats').classList.remove('hidden');
                     document.getElementById('atkVal').textContent = card.atk;
-                    document.getElementById('defVal').textContent = (card.def !== undefined) ? card.def : "-";
-                } else {
-                    monsterStats.classList.add('hidden');
-                }
+                    document.getElementById('defVal').textContent = card.def ?? "-";
+                } else document.getElementById('monsterStats').classList.add('hidden');
 
                 if (card.level) {
-                    cardLevelSpan.classList.remove('hidden');
+                    document.getElementById('cardLevelSpan').classList.remove('hidden');
                     document.getElementById('cardLevel').textContent = "★".repeat(Math.min(card.level, 12));
-                } else {
-                    cardLevelSpan.classList.add('hidden');
-                }
+                } else document.getElementById('cardLevelSpan').classList.add('hidden');
 
-                setTimeout(() => {
-                    cardDetails.classList.remove('hidden');
-                }, 800);
+                setTimeout(() => document.getElementById('cardDetails').classList.remove('hidden'), 800);
             };
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderLP('lp1', lp1);
+            renderLP('lp2', lp2);
+            updateTimerDisplay();
+        });
     </script>
 </body>
 </html>
